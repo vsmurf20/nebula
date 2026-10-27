@@ -1,0 +1,7 @@
+/* CATÁLOGO NEBULA: añade aquí cada juego nuevo. */
+window.GAMES = [
+  { id:"distrito-cero", title:"Distrito Cero", description:"Explora una ciudad, descubre sus sistemas y construye tu propia historia.", category:"Aventura", status:"Disponible", icon:"🌆", cover:"linear-gradient(135deg,#25224d,#7045a8 55%,#18162b)", path:"games/distrito-cero/index.html", version:"v70 · Proyecto en desarrollo" },
+  { id:"pizzeria-cascabel", title:"Pizzería Cascabel", description:"Una experiencia de suspense nocturno con cámaras, gestión y personajes inquietantes.", category:"Terror", status:"Disponible", icon:"🍕", cover:"linear-gradient(135deg,#3a1c25,#9b3f4b 55%,#25121e)", path:"games/pizzeria-cascabel/index.html", version:"v13 · Proyecto en desarrollo" },
+  { id:"elixir-brawl", title:"Elixir Brawl", description:"Combate en una arena, elige a tu héroe y despliega cartas con estrategia y reflejos.", category:"Acción", status:"Disponible", icon:"⚔️", cover:"linear-gradient(135deg,#173b50,#267ba0 55%,#171a35)", path:"games/elixir-brawl/index.html", version:"v2" },
+  { id:"minecraft-tycoon", title:"Minecraft Tycoon", description:"Pica bloques, consigue recursos, mejora tu pico y construye un imperio que genera riquezas automáticamente.", category:"Simulación", status:"Disponible", icon:"⛏️", cover:"linear-gradient(135deg,#263b24,#588b3f 55%,#33251a)", path:"games/minecraft-tycoon/index.html", version:"Proyecto incremental" }
+];
