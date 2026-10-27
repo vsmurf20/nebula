@@ -1,0 +1,4 @@
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const featured=document.querySelector('#featured-games');
+if(featured){featured.innerHTML=(window.GAMES||[]).filter(g=>g.status==='Disponible').slice(0,4).map(g=>`<article class="game-card"><div class="cover" style="--cover-bg:${esc(g.cover)}"><span class="cover-tag">${esc(g.category)}</span><span class="cover-art">${esc(g.icon)}</span></div><div class="card-content"><div class="card-topline"><h3>${esc(g.title)}</h3><span class="status">Disponible</span></div><p>${esc(g.description)}</p><div class="card-bottom"><span class="genre">${esc(g.category)}</span><a class="play-link" href="play.html?id=${encodeURIComponent(g.id)}">Jugar ahora ↗</a></div></div></article>`).join('');}
+const year=document.querySelector('#year');if(year)year.textContent=new Date().getFullYear();

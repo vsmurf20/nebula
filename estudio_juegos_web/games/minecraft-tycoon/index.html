@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Minecraft Tycoon</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1b1713;--panel:#2b241d;--p2:#3a3027;--line:#14100c;--hi:#5a4a3a;--text:#f1e8d8;--mut:#b5a58e;--em:#3fe07a;--warn:#e8b64a;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:21px/1.2 'VT323',ui-monospace,Menlo,monospace;transition:background 1s}
+h1,.px{font-family:'Press Start 2P','Courier New',monospace;font-weight:400}
+h1{font-size:15px;margin:0}
+.wrap{max-width:1020px;margin:0 auto;padding:14px;display:grid;gap:14px;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}
+@media(max-width:760px){.wrap{grid-template-columns:1fr}}
+header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.panel{background:var(--panel);border:4px solid var(--line);box-shadow:inset 4px 4px 0 var(--hi),inset -4px -4px 0 #1f1913;padding:14px}
+.bank{font:18px 'Press Start 2P',monospace;color:var(--em);display:flex;gap:8px;align-items:center}
+.sub{color:var(--mut)}
+.stage{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 0}
+#block{all:unset;cursor:pointer;display:block;width:min(250px,66vw);aspect-ratio:1;touch-action:manipulation;-webkit-tap-highlight-color:transparent;position:relative;z-index:2;outline-offset:6px;user-select:none}
+#block:focus-visible{outline:4px solid var(--warn)}
+#cv{width:100%;height:100%;image-rendering:pixelated;display:block;border:4px solid var(--line)}
+#block.hit #cv{animation:hit .12s}
+@keyframes hit{50%{transform:scale(.92) rotate(-1.5deg)}}
+.glow{position:absolute;top:50%;left:50%;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;background:radial-gradient(var(--g,#3fe07a55),transparent 65%);opacity:var(--o,0);transition:opacity .3s;pointer-events:none}
+.pop{position:absolute;pointer-events:none;font:12px 'Press Start 2P',monospace;color:var(--em);text-shadow:2px 2px 0 #000;animation:up .9s forwards;white-space:nowrap;z-index:5}
+.pop.c{color:var(--warn);font-size:17px}
+@keyframes up{to{transform:translateY(-90px);opacity:0}}
+.px-p{position:fixed;width:8px;height:8px;pointer-events:none;z-index:50}
+.name{font:11px 'Press Start 2P',monospace;min-height:14px}
+.bar{width:min(260px,70vw);height:14px;background:#14100c;border:3px solid var(--line);position:relative}
+.bar i{display:block;height:100%;width:0;background:var(--em)}
+.bar span{position:absolute;inset:0;font:8px/8px 'Press Start 2P',monospace;display:flex;align-items:center;justify-content:center;text-shadow:1px 1px 0 #000}
+.shake{animation:sh .25s}
+@keyframes sh{25%{transform:translate(4px,-3px)}50%{transform:translate(-4px,3px)}75%{transform:translate(3px,2px)}}
+.tabs,.dims{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.btn{all:unset;cursor:pointer;font:9px/1.4 'Press Start 2P',monospace;padding:8px 9px;background:var(--p2);border:3px solid var(--line);box-shadow:inset 2px 2px 0 var(--hi)}
+.btn:focus-visible{outline:3px solid var(--warn)}
+.btn.on{background:var(--em);color:#06240f}
+.btn.lock{opacity:.4;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:6px}
+.row{display:flex;justify-content:space-between;gap:8px}
+.inv{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;max-height:110px;overflow:auto}
+.chip{background:var(--p2);border:2px solid var(--line);padding:1px 7px;display:flex;gap:6px;align-items:center;font-size:18px}
+.chip i{width:11px;height:11px;border:1px solid #000}
+.item{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;width:100%;background:var(--p2);border:3px solid var(--line);padding:7px 10px;margin-bottom:7px}
+.item:focus-visible{outline:3px solid var(--warn)}
+.item .ic{font-size:24px;text-align:center}
+.item .t{font:10px/1.5 'Press Start 2P',monospace}
+.item .d{color:var(--mut);font-size:18px}
+.item .c{font:10px 'Press Start 2P',monospace;color:var(--em);text-align:right}
+.item.off{opacity:.5;cursor:not-allowed}.item.off .c{color:#e26a5a}
+.item:not(.off):hover{background:#463a2f}
+.item.max{border-color:var(--warn)}
+.ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px}
+.a{background:var(--p2);border:3px solid var(--line);padding:6px 8px;opacity:.45;font-size:18px}
+.a.got{opacity:1;border-color:var(--warn)}
+.a b{display:block;font:9px/1.5 'Press Start 2P',monospace;font-weight:400}
+.bonus{position:fixed;z-index:60;font-size:44px;cursor:pointer;all:unset;position:fixed;animation:bob 1s infinite alternate;filter:drop-shadow(0 0 10px #ffd84a);font-size:44px;z-index:60}
+@keyframes bob{to{transform:translateY(-12px) rotate(6deg)}}
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,-80px);background:var(--p2);border:3px solid var(--warn);padding:9px 14px;font:10px/1.5 'Press Start 2P',monospace;transition:transform .3s;pointer-events:none;max-width:92vw;text-align:center;z-index:99}
+.toast.on{transform:translate(-50%,0)}
+.fr{color:var(--warn);font:10px 'Press Start 2P',monospace;min-height:14px}
+@media(prefers-reduced-motion:reduce){.shake,#block.hit #cv,.pop,.bonus{animation:none}}
+.peter{all:unset;cursor:pointer;display:flex;gap:10px;align-items:center;margin:8px 0;width:100%}.peter:focus-visible{outline:3px solid var(--warn)}.peter>span:first-child{font-size:36px}.bubble{background:var(--p2);border:3px solid var(--line);padding:4px 8px;font-size:18px;min-height:34px;flex:1}.round .panel,.round .item,.round .btn,.round .a,.round .bubble,.round #cv{border-radius:12px}
+.track{position:relative;height:44px;border-bottom:4px solid #5a8a3a;margin:4px 0 12px}.track .pp{position:absolute;bottom:0;font-size:30px;transition:left 1.2s;animation:walk .6s infinite alternate}.track .eg{position:absolute;right:0;bottom:0;font-size:28px;animation:glw 1.5s infinite alternate}@keyframes walk{to{transform:translateY(-5px)}}@keyframes glw{to{filter:drop-shadow(0 0 8px #b060ff)}}.peter>span:first-child{animation:walk .8s infinite alternate}.peter.jump>span:first-child{animation:jmp .6s 2}@keyframes jmp{50%{transform:translateY(-26px) scale(1.3) rotate(10deg)}}.cut{position:fixed;left:50%;top:22%;z-index:100;background:var(--p2);border:4px solid var(--warn);padding:14px 22px;text-align:center;font-size:22px;pointer-events:none;animation:cut 2.6s forwards;max-width:92vw}.cut b{display:block;font:13px/1.6 'Press Start 2P',monospace;color:var(--warn)}@keyframes cut{0%{transform:translate(-50%,-40px) scale(.6);opacity:0}12%{transform:translate(-50%,0) scale(1.08);opacity:1}20%{transform:translate(-50%,0) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-20px)}}.bar i{transition:width .4s}@media(prefers-reduced-motion:reduce){.peter>span:first-child,.pp,.eg,.cut{animation:none}.cut{transform:translateX(-50%)}}
+.panel{background-image:linear-gradient(#ffffff05 50%,#0000 50%);background-size:100% 4px}h1{text-shadow:3px 3px 0 #000;color:#fff}
+.stage{border:4px solid var(--line);box-shadow:inset 0 0 50px #000a;overflow:hidden;margin:8px 0;padding:18px 0 14px;text-shadow:1px 1px 0 #000;color:#fff}
+.stage::before{content:'';position:absolute;inset:-100% 0 0;pointer-events:none;opacity:.7;background-image:radial-gradient(2px 2px at 20% 30%,var(--mc,#fff),#0000),radial-gradient(2px 2px at 65% 55%,var(--mc,#fff),#0000),radial-gradient(3px 3px at 85% 20%,var(--mc,#fff),#0000),radial-gradient(2px 2px at 40% 80%,var(--mc,#fff),#0000);background-size:220px 220px;animation:drift 14s linear infinite}
+@keyframes drift{to{transform:translateY(220px)}}
+#block{animation:idle 2.6s ease-in-out infinite alternate;filter:drop-shadow(0 10px 8px #0008)}@keyframes idle{to{transform:translateY(-8px)}}
+.item .ic{background:#0004;border:2px solid #0008;box-shadow:inset 2px 2px 0 #0006,inset -2px -2px 0 #fff2;height:38px;display:grid;place-items:center}
+.bar i{box-shadow:inset 0 3px 0 #fff4,inset 0 -3px 0 #0003}.btn:active,.item:active{transform:translateY(2px)}
+.spr{height:40px;width:30px;image-rendering:pixelated;display:block}.track .pp{display:block}
+.ch{padding:4px 8px;border-left:4px solid var(--line);margin-bottom:3px;background:var(--p2);font-size:18px}.ch.done{border-color:var(--em)}.ch.cur{border-color:var(--warn);background:#0003}.ch.lk{opacity:.4}
+.acth{background:linear-gradient(90deg,var(--ac),#0000);border:3px solid var(--line);padding:8px 10px;margin-bottom:8px}.acth b{font:10px/1.6 'Press Start 2P',monospace;display:block}
+@media(prefers-reduced-motion:reduce){#block,.stage::before{animation:none}}
+.pets{display:flex;gap:8px;flex-wrap:wrap;font-size:26px}.pt{display:inline-block;animation:walk .7s infinite alternate}@media(prefers-reduced-motion:reduce){.pt{animation:none}}
+.hot{display:flex;gap:5px;margin-top:2px}.slot{width:40px;height:40px;background:#0007;border:3px solid var(--line);display:grid;place-items:center;font-size:20px;position:relative;transition:transform .15s;text-shadow:none}.slot.on{transform:translateY(-6px);box-shadow:0 6px 12px #000a,0 0 10px #e8b64a88}.slot small{position:absolute;right:1px;bottom:-3px;font:8px 'Press Start 2P',monospace;color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+<header><h1>⛏ Minecraft Tycoon</h1><div style="display:flex;gap:6px"><button class="btn" id="snd">🔊</button><button class="btn" id="reset">Reiniciar</button></div></header>
+
+<section class="panel">
+ <div class="bank">💎 <span id="em">0</span></div>
+ <div class="sub"><span id="cps">0</span> por segundo · <span id="gm"></span></div>
+ <div class="fr" id="fr"></div><button class="peter" id="peter" aria-label="Hablar con Peter"><span>🧑‍🌾</span><span class="bubble" id="pb"></span></button><div class="pets" id="pets"></div>
+ <div class="stage" id="stage"><div class="glow" id="glow"></div>
+  <button id="block" aria-label="Picar bloque"><canvas id="cv" width="16" height="16"></canvas></button>
+  <div class="name" id="bname"></div><div class="hot" id="hot"></div><div class="sub" id="hn" style="min-height:18px"></div>
+  <div class="bar"><i id="cb"></i><span id="ct"></span></div>
+ </div>
+ <div class="dims" id="dims"></div>
+ <div class="stats">
+  <div class="row"><span class="sub">Pico</span><b id="pk"></b></div><div class="row"><span class="sub">Por golpe</span><b id="cp"></b></div>
+  <div class="row"><span class="sub">Bloques</span><b id="tot"></b></div><div class="row"><span class="sub">Crítico</span><b id="crt"></b></div>
+ </div>
+ <div class="inv" id="inv"></div>
+</section>
+
+<section class="panel">
+ <div class="tabs" id="tabs"></div>
+ <div id="t0"></div><div id="t1" hidden></div><div id="t2" hidden></div><div id="t3" hidden></div><div id="t4" hidden></div><div id="t5" hidden></div><div id="t6" hidden></div><div id="t7" hidden></div><div id="t8" hidden></div><div id="t9" hidden></div>
+</section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+var D=[{n:'Superficie',at:0,bg:'#1b1713',ic:'🌳'},{n:'Cuevas',at:150,bg:'#14171d',ic:'🕳'},{n:'Nether',at:800,bg:'#2a110e',ic:'🔥'},{n:'End',at:3000,bg:'#17112b',ic:'🌌'}];
+var BL=[
+[0,'Tierra',1,0,50,'7a5230','','d'],[0,'Tronco',2,0,30,'6b4f2a','','l'],[0,'Piedra',3,1,40,'808080'],[0,'Carbón',6,1,20,'808080','1e1e1e'],
+[0,'Hierro',12,2,14,'808080','d8af93'],[0,'Oro',25,2,8,'808080','fcdd3b'],[0,'Diamante',60,3,5,'808080','5decf5'],
+[1,'Pizarra',40,1,40,'4a4a52'],[1,'Cobre',60,2,25,'4a4a52','e0773d'],[1,'Lapislázuli',110,2,15,'4a4a52','2b4fd8'],[1,'Redstone',160,3,12,'4a4a52','e02020'],
+[1,'Esmeralda',400,3,8,'4a4a52','3fe07a'],[1,'Diamante profundo',900,4,4,'4a4a52','5decf5'],
+[2,'Netherrack',500,3,40,'7a3030'],[2,'Arena de almas',800,3,25,'5b4636'],[2,'Cuarzo',1600,4,18,'7a3030','efe8e0'],[2,'Oro del Nether',3200,4,10,'7a3030','fcdd3b'],[2,'Escombros antiguos',12000,5,3,'5a3b3b','e0a070'],
+[3,'Piedra del End',9000,4,40,'d9d99a'],[3,'Obsidiana',20000,5,20,'1a1030','5a3a9a'],[3,'Purpur',45000,5,14,'a97fb8'],[3,'Fruto de coro',120000,6,6,'d9d99a','9a5ab0'],[3,'Huevo de dragón',2e6,6,1,'0e0b14','b060ff']];
+var PK=[['Madera',0,1,'🪵'],['Piedra',60,2,'🪨'],['Hierro',600,4,'⛓'],['Diamante',7000,8,'💎'],['Netherita',9e4,16,'🔥'],['Encantado',1.2e6,40,'✨'],['Cósmico',3e7,120,'🌠']];
+var BD=[['Aldeano minero','🧑‍🌾',15,.5],['Mina de carbón','🚇',100,4],['Granja de trigo','🌾',1100,20],['Herrería','⚒',12000,100],['Biblioteca encantada','📚',130000,600],['Granja de golems','🤖',1.4e6,3500],
+['Portal al Nether','🟣',2e7,2e4],['Fortaleza de piglins','🏰',3.3e8,1.4e5],['Ciudad del End','🌆',5.1e9,9e5],['Ender Dragon domado','🐉',7.5e10,6e6],['Faro cósmico','🔆',1e12,4.5e7]];
+var MS=[10,25,50,100,150];
+var UP=[['Eficiencia','⚡',100,1.7,99,'+25% por golpe'],['Suerte','🍀',250,1.9,20,'+2% de crítico (x5)'],['Aldeanos felices','😊',500,2,50,'+10% a edificios'],['Fortuna','💰',2000,2.3,30,'+5% por logro extra']];
+var AC=[['🪓','Primer golpe','1 bloque',function(){return S.tot>=1}],['⛏','Minero','100 bloques',function(){return S.tot>=100}],['🔨','Obsesivo','1.000 bloques',function(){return S.tot>=1e3}],['🏭','Máquina','10.000 bloques',function(){return S.tot>=1e4}],
+['🏠','Aldea','1 edificio',function(){return nb()>=1}],['🏘','Urbanista','50 edificios',function(){return nb()>=50}],['🌆','Metrópolis','200 edificios',function(){return nb()>=200}],
+['💰','Rico','1M ganadas',function(){return S.earned>=1e6}],['🤑','Multimillonario','1B ganadas',function(){return S.earned>=1e9}],['💎','¡Diamantes!','Pica un diamante',function(){return S.m[6]>0}],
+['🔥','Viajero','Entra al Nether',function(){return S.tot>=800}],['🌌','El fin','Llega al End',function(){return S.tot>=3000}],['🔗','Combo x5','Combo máximo',function(){return S.bc>=100}],['🍀','Suertudo','25 críticos',function(){return S.cr>=25}],
+['🎁','Cazador','5 bonus',function(){return S.bn>=5}],['🔥','Netherita','Pico de netherita',function(){return S.pick>=5}],['🥚','Dragón','Huevo de dragón',function(){return S.m[22]>0}],['⭐','Renacido','Renace una vez',function(){return S.xp>=1}]];
+function def(){return{e:0,earned:0,tot:0,pick:0,up:[0,0,0,0],b:BD.map(function(){return 0}),m:{},bi:0,dim:0,xp:0,ach:{},bc:0,cr:0,bn:0,mute:0,t:0,st:0,th:[0],tc:0,fx:1,sh:1,rd:0,fs:21,pt:0}}
+function load(){try{var s=JSON.parse(localStorage.getItem('mct3'));if(s&&s.b&&s.b.length===BD.length)return s}catch(x){}return def()}
+var S=load();fix();function fix(){S.st=S.st||0;S.th=S.th||[0];S.tc=S.tc||0;S.pt=S.pt||0;S.sqd=S.sqd||0;S.sqa=S.sqa||[];S.cf=S.cf||{};S.tl=S.tl||[0,0,0,0,0,0];S.td=S.td||[0,0,0,0,0,0];S.tb=S.tb||[0,0,0,0,0,0];S.cs=S.cs||[1,1,1,1,1,1];S.ud=S.ud||{};S.tl.forEach(function(l,i){if(l>0&&!S.td[i])S.td[i]=60*l});S.pick=S.tl[0]||0;S.pets=S.pets||{};S.fs=S.fs||21;if(S.fx===undefined){S.fx=1;S.sh=1;S.rd=0}}function save(){S.t=Date.now();try{localStorage.setItem('mct3',JSON.stringify(S))}catch(x){}}
+var $=function(i){return document.getElementById(i)};
+function fmt(n){if(n<1e3)return n<10&&n%1?n.toFixed(1):Math.floor(n)+'';var u=['K','M','B','T','Qa'],i=-1;while(n>=1e3&&i<4){n/=1e3;i++}return n.toFixed(n<10?2:1)+u[i]}
+function nb(){return S.b.reduce(function(a,b){return a+b},0)}
+function na(){return Object.keys(S.ach).length}
+function G(){return(1+(.05+.05*S.up[3])*na())*(1+.1*S.xp)*(1+.02*S.st)*(1+.01*(S.sqd||0))*(ci(4)?1.25:1)*(pet(7)?1.5:1)*(pet(5)?1.1:1)}
+function ms(i){var m=1;MS.forEach(function(t){if(S.b[i]>=t)m*=2});return m}
+function cps(){var s=0;BD.forEach(function(b,i){s+=b[3]*S.b[i]*ms(i)});return s*(1+.1*S.up[2])*(ci(6)?1.4:1)*(pet(4)?1.15:1)*G()}
+var combo=0,lastC=0,fz=0,bonusOn=false;
+function cmult(){return 1+Math.min(combo,100)/(ci(2)?16.7:25)}
+function clickBase(){return PK[S.pick][2]*(1+.25*S.up[0])*G()*(ci(0)?1.2:1)*(pet(0)?1.1:1)*cmult()*(fz>0?7:1)}
+function critP(){return Math.min(.6,.05+.02*S.up[1]+(lk>0?.3:0)+(pet(1)?.04:0))}
+function bcost(i,n){var a=Math.pow(1.15,S.b[i]);return Math.ceil(BD[i][2]*a*(Math.pow(1.15,n)-1)/.15)}
+function ucost(i){return Math.ceil(UP[i][2]*Math.pow(UP[i][3],S.up[i]))}
+var qty=1;
+
+/* audio */
+var ac;function beep(f,d,t,v){if(S.mute)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),g=ac.createGain();o.type=t||'square';o.frequency.value=f;g.gain.value=v||.05;g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(x){}}
+function arp(a,t){a.forEach(function(f,i){setTimeout(function(){beep(f,.15,t||'square',.06)},i*70)})}
+
+/* texturas */
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function rgb(h){var n=parseInt(h,16);return[n>>16,n>>8&255,n&255]}
+var cache={};
+function tex(i){if(cache[i])return cache[i];var b=BL[i],c=document.createElement('canvas');c.width=c.height=16;var x=c.getContext('2d'),r=rng(i*977+13);
+ for(var y=0;y<16;y++)for(var u=0;u<16;u++){var s=(r()*40-20)|0,k=rgb(b[5]);
+  if(b[7]==='l'&&u%4<1)s-=22;if(b[7]==='d'&&y<4){k=[88,158,60];s=(r()*20-10)|0}
+  x.fillStyle='rgb('+k.map(function(v){return Math.max(0,Math.min(255,v+s))})+')';x.fillRect(u,y,1,1)}
+ if(b[6]){x.fillStyle='#'+b[6];for(var j=0;j<7;j++){var px=(r()*13+1)|0,py=(r()*13+1)|0;x.fillRect(px,py,2,2);x.fillRect(px+1,py+1,1,2)}}
+ return cache[i]=c}
+var cx=$('cv').getContext('2d');cx.imageSmoothingEnabled=false;
+function draw(){cx.clearRect(0,0,16,16);cx.drawImage(tex(S.bi),0,0);$('bname').textContent=BL[S.bi][1]}
+function nextBlock(){var mt=99;BL.forEach(function(b){if(b[0]===S.dim&&b[3]<mt)mt=b[3]});var lim=Math.max(S.pick,mt),p=[],tw=0;
+ BL.forEach(function(b,i){if(b[0]===S.dim&&b[3]<=lim){p.push(i);tw+=b[4]}});var r=Math.random()*tw;
+ for(var j=0;j<p.length;j++){r-=BL[p[j]][4];if(r<=0)return p[j]}return p[0]}
+
+/* UI */
+var T=['Mejoras','Imperio','Logros','Renacer','Historia','HUD','Ajustes','Taller','Mascotas','Herramientas'],tabs=$('tabs');
+T.forEach(function(n,i){var b=document.createElement('button');b.className='btn'+(i?'':' on');b.textContent=n;b.onclick=function(){[].forEach.call(tabs.children,function(c,j){c.classList.toggle('on',j===i);$('t'+j).hidden=j!==i})};tabs.appendChild(b)});
+function item(ic,p,fn){var b=document.createElement('button');b.className='item';b.innerHTML='<span class="ic">'+ic+'</span><span><div class="t"></div><div class="d"></div></span><span class="c"></span>';b.onclick=fn;p.appendChild(b);return b}
+function upd(el,t,d,c,off){el.querySelector('.t').textContent=t;el.querySelector('.d').textContent=d;el.querySelector('.c').textContent=c;el.classList.toggle('off',off)}
+var pkEl=item('⛏',$('t0'),function(){var n=PK[S.pick+1];if(n&&S.e>=n[1]){S.e-=n[1];S.pick++;arp([392,523,659,784]);toast('¡Pico de '+n[0]+'!');save();render()}});
+var upEl=UP.map(function(u,i){return item(u[1],$('t0'),function(){var c=ucost(i);if(S.e>=c&&S.up[i]<u[4]){S.e-=c;S.up[i]++;arp([440,660]);save();render()}})});
+var qb=document.createElement('div');qb.className='tabs';[1,10,100].forEach(function(q){var b=document.createElement('button');b.className='btn'+(q===1?' on':'');b.textContent='x'+q;b.onclick=function(){qty=q;[].forEach.call(qb.children,function(c){c.classList.toggle('on',c===b)});render()};qb.appendChild(b)});$('t1').appendChild(qb);
+var bEl=BD.map(function(b,i){return item(b[1],$('t1'),function(){var c=bcost(i,qty);if(S.e>=c){S.e-=c;S.b[i]+=qty;beep(520,.1);if(MS.indexOf(S.b[i])>=0)toast(b[0]+': ¡producción x2!');save();render()}})});
+var acEl=AC.map(function(a){var d=document.createElement('div');d.className='a';d.innerHTML='<b>'+a[0]+' '+a[1]+'</b>'+a[2];$('t2').appendChild(d);return d});
+var xpd=document.createElement('div');xpd.innerHTML='<p>Renacer reinicia esmeraldas, pico, mejoras y edificios, pero conservas logros y ganas niveles de XP: cada uno da +10% a todo.</p>';$('t3').appendChild(xpd);
+var rb=document.createElement('button');rb.className='btn';$('t3').appendChild(rb);
+var armed=0;rb.onclick=function(){var g=xpGain();if(g<1)return;if(!armed){armed=1;rb.textContent='¿Seguro? Pulsa otra vez';setTimeout(function(){armed=0},3000);return}
+ armed=0;var k=def();k.tot=S.tot;k.ach=S.ach;k.xp=S.xp+g;k.bc=S.bc;k.cr=S.cr;k.bn=S.bn;k.mute=S.mute;k.st=S.st;k.th=S.th;k.tc=S.tc;k.fx=S.fx;k.sh=S.sh;k.rd=S.rd;k.fs=S.fs;bak('antes de renacer');k.pt=S.pt;k.sqd=S.sqd;k.cf=S.cf;k.pets=S.pets;S=k;fix();S.bi=nextBlock();arp([262,330,392,523,659,784],'triangle');toast('¡Renaces con +'+g+' XP!');save();draw();render()};
+function xpGain(){return Math.floor(Math.sqrt(S.earned/2e6))}
+/* nuevas dimensiones */
+D.push({n:'Océano',at:4500,bg:'#06222f',ic:'🌊'},{n:'Mesa dorada',at:7500,bg:'#2e1a10',ic:'🏜'},{n:'Cielo',at:12000,bg:'#1a2a44',ic:'☁'},{n:'Vacío',at:20000,bg:'#07030f',ic:'⚫'});
+BL.push([4,'Arena del fondo',20000,4,40,'d8c88a'],[4,'Prismarina',45000,5,25,'3a9a8a','9ae6d6'],[4,'Coral',80000,5,15,'c04a8a'],[4,'Corazón del mar',600000,6,3,'2a6a8a','5decf5'],[5,'Terracota',60000,4,40,'b0603a'],[5,'Cuarzo rojo',100000,5,22,'a04030','ffd0a0'],[5,'Oro de mesa',250000,5,12,'b0603a','fcdd3b'],[5,'Tesoro enterrado',1.2e6,6,2,'8a4a2a','ffe05a'],[6,'Nube sólida',150000,5,40,'e8f0ff'],[6,'Cristal celeste',400000,5,20,'9ad0ff','ffffff'],[6,'Aetherita',1.5e6,6,8,'6a8aff','c8d8ff'],[6,'Meteorito',4e6,6,2,'3a3a4a','ff8a2a'],[7,'Piedra del vacío',500000,6,40,'14101e'],[7,'Materia oscura',2e6,6,15,'2a1a4a','b060ff'],[7,'Estrella caída',8e6,6,3,'1a1a2a','ffe86a']);
+var dimEl=D.map(function(d,i){var b=document.createElement('button');b.className='btn';b.onclick=function(){if(S.tot>=d.at){S.dim=i;S.bi=nextBlock();draw();render()}};$('dims').appendChild(b);return b});
+
+var tt;function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('on')},2200)}
+function render(){
+ $('em').textContent=fmt(S.e);$('cps').textContent=fmt(cps());$('gm').textContent='x'+G().toFixed(2)+' global';
+ $('pk').textContent=PK[S.pick][0];$('cp').textContent=fmt(clickBase());$('tot').textContent=fmt(S.tot);$('crt').textContent=Math.round(critP()*100)+'%';
+ var n=PK[S.pick+1];if(n)upd(pkEl,'Pico de '+n[0],'x'+n[2]+' por golpe y minerales nuevos',fmt(n[1]),S.e<n[1]);else{upd(pkEl,'Pico cósmico','Nivel máximo','MÁX',0);pkEl.classList.add('max')}
+ UP.forEach(function(u,i){var m=S.up[i]>=u[4];upd(upEl[i],u[0]+' '+S.up[i],u[5],m?'MÁX':fmt(ucost(i)),m||S.e<ucost(i))});
+ BD.forEach(function(b,i){var c=bcost(i,qty);upd(bEl[i],b[0]+' ('+S.b[i]+')',b[3]*ms(i)>=1?'+'+fmt(b[3]*ms(i))+'/s c/u':'+'+b[3]*ms(i)+'/s c/u',fmt(c),S.e<c)});
+ D.forEach(function(d,i){var l=S.tot<d.at;dimEl[i].textContent=l?'🔒 '+d.at:d.ic+' '+d.n;dimEl[i].classList.toggle('on',S.dim===i);dimEl[i].classList.toggle('lock',l)});
+ document.body.style.background=D[S.dim].bg;scene();
+ var g=xpGain();rb.textContent=g>=1?'Renacer: +'+g+' XP':'Necesitas ganar más (sqrt de ganancias/2M)';rb.classList.toggle('lock',g<1);
+ var h='';BL.forEach(function(b,i){var q=S.m[i];if(q)h+='<span class="chip"><i style="background:#'+(b[6]||b[5])+'"></i>'+b[1]+' '+fmt(q)+'</span>'});$('inv').innerHTML=h;rTh();rCr();hud()}
+function checkAch(){stCheck();AC.forEach(function(a,i){if(!S.ach[i]&&a[3]()){S.ach[i]=1;arp([523,659,784,1047],'triangle');toast('🏆 '+a[1]+': +5% global');render()}});acEl.forEach(function(e,i){e.classList.toggle('got',!!S.ach[i])})}
+
+/* efectos */
+function burst(x,y,col,n){if(!S.fx)return;for(var i=0;i<n;i++){var p=document.createElement('i');p.className='px-p';p.style.cssText='left:'+x+'px;top:'+y+'px;background:'+col;document.body.appendChild(p);
+ var a=Math.random()*6.28,d=40+Math.random()*90;p.animate([{transform:'translate(0,0)',opacity:1},{transform:'translate('+Math.cos(a)*d+'px,'+(Math.sin(a)*d+60)+'px) rotate(200deg)',opacity:0}],{duration:600+Math.random()*300,easing:'cubic-bezier(.2,.7,.4,1)'}).onfinish=function(){this.effect.target.remove()}}}
+var blk=$('block'),stage=$('stage');
+blk.addEventListener('click',function(ev){if(!hit1())return;
+ var now=Date.now();combo=now-lastC<1100?combo+1:1;lastC=now;if(combo>S.bc)S.bc=combo;
+ var i=S.bi,crit=Math.random()<critP(),g=BL[i][2]*clickBase()*(crit?(ci(3)?7:5):1)*(BL[i][0]>=4&&ci(7)?2:1);
+ S.e+=g;S.earned+=g;S.tot++;S.m[i]=(S.m[i]||0)+1;if(crit)S.cr++;
+ var br=blk.getBoundingClientRect(),sr=stage.getBoundingClientRect(),c='#'+(BL[i][6]||BL[i][5]);
+ var p=document.createElement('span');p.className='pop'+(crit?' c':'');p.textContent=(crit?'¡CRÍTICO! ':'+')+fmt(g);
+ p.style.left=(br.left-sr.left+br.width*(.1+Math.random()*.4))+'px';p.style.top=(br.top-sr.top+br.height*.3)+'px';stage.appendChild(p);setTimeout(function(){p.remove()},900);
+ burst(br.left+br.width/2,br.top+br.height/2,c,crit?26:8);
+ if(crit){var w=$('wrap');w.classList.remove('shake');void w.offsetWidth;if(S.sh)w.classList.add('shake');arp([660,880,1320])}else beep(160+Math.min(combo,100)*7,.07);
+ if(BL[i][2]>=1e3&&S.m[i]===1)toast('¡Primer '+BL[i][1]+'!');
+ blk.classList.remove('hit');void blk.offsetWidth;blk.classList.add('hit');
+ wear(lastT);S.bi=nextBlock();draw();render();checkAch()});
+
+/* bonus aleatorios */
+function spawn(){if(bonusOn)return;bonusOn=true;var b=document.createElement('button'),fr=Math.random()<.4;b.className='bonus';b.textContent=fr?'💚':'🎁';b.setAttribute('aria-label','Bonus');
+ b.style.left=(8+Math.random()*80)+'vw';b.style.top=(15+Math.random()*65)+'vh';document.body.appendChild(b);
+ var off=setTimeout(function(){b.remove();bonusOn=false},12000);
+ b.onclick=function(){clearTimeout(off);var r=b.getBoundingClientRect();burst(r.left+20,r.top+20,'#ffd84a',30);b.remove();bonusOn=false;S.bn++;
+  if(fr){fz=20;toast('¡Frenesí del Creeper! Golpes x7 durante 20s')}else{var g=Math.max(cps()*90,clickBase()*60)*(pet(3)?2:1);S.e+=g;S.earned+=g;toast('🎁 Cofre: +'+fmt(g))}
+  arp([523,784,1047,1568],'triangle');render();checkAch()}}
+(function loop(){setTimeout(function(){spawn();loop()},(25000+Math.random()*35000)*(ci(1)?.5:1))})();
+setTimeout(spawn,12000);
+
+/* historia de Peter */
+var ST=[['Peter pierde su aldea','Un Creeper arrasó todo y no tienes nada. Pica tronco y tierra a mano, craftea herramientas y pica 25 bloques.',function(){return S.tot>=25},500],
+['Herramientas','Pica tronco a mano y craftea un pico de piedra en la pestaña Herramientas.',function(){return S.pick>=2},2000],
+['Una nueva aldea','Reúne 5 aldeanos mineros que ayuden a Peter.',function(){return S.b[0]>=5},1e4],
+['Rumores bajo tierra','Los aldeanos hablan de cuevas profundas. Pica 150 bloques.',function(){return S.tot>=150},1e5],
+['El Nether','Un portal espera. Craftea un pico de netherita y pica 800 bloques.',function(){return S.pick>=5&&S.tot>=800},2e6],
+['Las islas del End','El dragón vigila. Llega a 3000 bloques y abre el End.',function(){return S.tot>=3000},5e7],
+['El huevo del dragón','El huevo está en el End, entre obsidiana y purpur. Pícalo.',function(){return S.m[22]>0},0]];
+var pbt;function say(m){$('pb').textContent=m;clearTimeout(pbt);pbt=setTimeout(function(){$('pb').textContent=''},7000)}
+function stCheck(){var c=ST[S.st];if(c&&c[2]()){S.st++;S.e+=c[3];S.earned+=c[3];arp([392,523,659,784,1047],'triangle');if(S.st>=ST.length){say('¡El huevo del dragón! Lo logramos, gracias.');toast('📖 ¡Historia completada!')}else{say(ST[S.st][1]);toast('📖 Capítulo '+S.st+' completado'+(c[3]?': +'+fmt(c[3]):''))}renderSt()}}
+function renderSt(){$('t4').innerHTML=ST.map(function(c,i){var v=i<=S.st;return '<div class="a'+(i<S.st?' got':'')+'" style="opacity:'+(v?1:.35)+';margin-bottom:7px"><b>'+(i<S.st?'✔ ':i===S.st?'▶ ':'🔒 ')+'Cap. '+(i+1)+': '+(v?c[0]:'???')+'</b>'+(v?c[1]:'')+'</div>'}).join('')+'<p class="sub">Cada capítulo completado da +8% a todo. Toca a Peter para que te ayude.</p>'}
+/* 200 capítulos + misiones secundarias */
+function genST(){var out=ST.slice(0,6),ACT=['Aldea en ruinas','Bosque oscuro','Minas olvidadas','Cuevas de cristal','Pantano de brujas','Desierto del templo','Montañas nevadas','Bastión del Nether','Ciudad antigua','Islas del End'],
+EV=['encuentra huellas extrañas','descifra un mapa roto','duerme junto a una hoguera','huye de un esqueleto','trueca con un viajero','oye un rugido lejano','halla una carta de su abuelo','repara su viejo pico','ve una sombra con alas','comparte pan con un golem'],
+TT=['La huella','El mapa','La hoguera','La huida','El trueque','El rugido','La carta','El pico','La sombra','El pan'],
+GL=[['Pica # bloques en total',function(){return S.tot},function(n){return 150+n*60}],['Gana # esmeraldas',function(){return S.earned},function(n){return Math.floor(1000*Math.pow(1.12,n))}],['Ten # edificios',nb,function(n){return Math.min(200,5+n)}],['Logra # críticos',function(){return S.cr},function(n){return 3+n*2}],['Atrapa # bonus',function(){return S.bn},function(n){return 1+Math.floor(n/5)}],['Sube Eficiencia a nivel #',function(){return S.up[0]},function(n){return Math.min(30,1+Math.floor(n/7))}]];
+for(var i=6;i<199;i++)(function(i){var n=i-5,g=GL[i%6],t=g[2](n),f=g[1];out.push([TT[i%10]+' · '+ACT[Math.floor(i/20)%10],(i%20===0?'Nueva etapa. ':'')+'Peter '+EV[(i*3)%10]+'. Objetivo: '+g[0].replace('#',fmt(t))+'.',function(){return f()>=t},Math.floor(300*Math.pow(1.13,n)),function(){return Math.min(1,f()/t)}])})(i);
+out.push(['El huevo del dragón','Peter llegó al final del End. Pícalo hasta encontrar el huevo.',function(){return S.m[22]>0},0,function(){return S.m[22]>0?1:Math.min(.95,S.tot/9e3)}]);return out}
+ST=genST();
+var MET=[function(){return S.tot},function(){return S.cr},function(){return S.earned},function(){return S.bn},nb],SQL=['Pica bloques:','Logra críticos:','Gana esmeraldas:','Atrapa bonus:','Construye edificios:'];
+function mkQ(){var t=Math.random()*5|0,L=S.st+1,n=[20+L*1.2,3+L/5,Math.max(cps()*150,400*Math.pow(1.1,L)),1+L/40,2+L/6][t]*(.6+Math.random()*.8);return{t:t,n:Math.max(1,Math.round(n)),r:Math.round(Math.max(cps()*400,300*Math.pow(1.1,L))*(.6+Math.random()*.8))}}
+function newOffers(){S.sqo=[mkQ(),mkQ(),mkQ()]}
+function cut(t,s){var d=document.createElement('div');d.className='cut';d.innerHTML='<b>'+t+'</b>'+s;document.body.appendChild(d);setTimeout(function(){d.remove()},2600);if(S.fx)[0,1,2].forEach(function(j){setTimeout(function(){burst(innerWidth/2+(j-1)*90,130,['#ffd84a','#3fe07a','#5decf5'][j],24)},j*150)});var p=$('peter');p.classList.remove('jump');void p.offsetWidth;p.classList.add('jump')}
+function stCheck(){var c=ST[S.st];if(c&&c[2]()){S.st++;S.e+=c[3];S.earned+=c[3];arp([392,523,659,784,1047],'triangle');var f=S.st>=ST.length;cut(f?'🥚 ¡HISTORIA COMPLETA!':'📖 Capítulo '+S.st+' completado',f?'Peter encontró el huevo del dragón':(c[3]?'+'+fmt(c[3])+' esmeraldas':''));say(f?'¡El huevo del dragón! Lo logramos.':ST[S.st][1]);renderSt()}
+ for(var i=S.sqa.length-1;i>=0;i--){var q=S.sqa[i];if(MET[q.t]()-q.base>=q.n){S.sqa.splice(i,1);S.sqd++;S.e+=q.r;S.earned+=q.r;arp([523,659,784],'triangle');cut('⚔ Misión completada','+'+fmt(q.r)+' esmeraldas · +1% global');renderSt()}}
+ if(!$('t4').hidden)renderSt()}
+function renderSt(){var c=ST[S.st],h='<div class="track"><span class="pp" style="left:'+Math.min(94,S.st/ST.length*94)+'%">🧑‍🌾</span><span class="eg">🥚</span></div>';
+ if(c)h+='<div class="a got" style="opacity:1;margin-bottom:7px"><b>▶ Cap. '+(S.st+1)+'/'+ST.length+': '+c[0]+'</b>'+c[1]+(c[4]?'<div class="bar" style="width:100%;margin-top:6px"><i style="width:'+Math.floor(c[4]()*100)+'%"></i></div>':'')+'</div>';else h+='<p>¡Historia completada!</p>';
+ for(var i=Math.max(0,S.st-3);i<S.st;i++)h+='<div class="a got" style="opacity:.6;margin-bottom:5px"><b>✔ Cap. '+(i+1)+': '+ST[i][0]+'</b></div>';
+ h+='<p class="sub" style="margin:10px 0 6px">Misiones secundarias (máx. 2 activas) · hechas: '+S.sqd+' (+1% global cada una)</p>';
+ S.sqa.forEach(function(q,i){var p=Math.max(0,Math.min(1,(MET[q.t]()-q.base)/q.n));h+='<div class="a got" style="opacity:1;margin-bottom:6px"><b>⚔ Activa</b>'+SQL[q.t]+' '+fmt(q.n)+' · premio '+fmt(q.r)+'<div class="bar" style="width:100%;margin-top:6px"><i style="width:'+Math.floor(p*100)+'%"></i></div><button class="btn" data-a="x'+i+'" style="margin-top:6px">Abandonar</button></div>'});
+ if(!S.sqo||!S.sqo.length)newOffers();
+ S.sqo.forEach(function(q,i){h+='<div class="a" style="opacity:1;margin-bottom:6px"><b>📜 Oferta</b>'+SQL[q.t]+' '+fmt(q.n)+' · premio '+fmt(q.r)+'<br><button class="btn" data-a="a'+i+'" style="margin-top:6px">Aceptar</button></div>'});
+ $('t4').innerHTML=h+'<button class="btn" data-a="r">Nuevas ofertas</button>'}
+$('t4').onclick=function(e){var b=e.target.closest('[data-a]');if(!b)return;var a=b.dataset.a,i=+a.slice(1);
+ if(a[0]==='a'){if(S.sqa.length>=2){toast('Máximo 2 misiones activas');return}var q=S.sqo.splice(i,1)[0];q.base=MET[q.t]();S.sqa.push(q);S.sqo.push(mkQ());beep(600,.1)}else if(a[0]==='x')S.sqa.splice(i,1);else newOffers();save();renderSt()};
+/* gráficos + capítulos por actos */
+var ld=-1;function scene(){if(ld===S.dim)return;ld=S.dim;var c=[['#2b5f8f','#4f8f4a','#fff'],['#10131a','#232a35','#ffb84a'],['#3a0d0a','#7a2418','#ff7a2a'],['#0c0820','#2a1750','#d9b8ff'],['#05304a','#0b6a8a','#9ae6ff'],['#5a2a14','#b0603a','#ffd0a0'],['#4a7ab0','#cfe4ff','#ffffff'],['#000000','#12081f','#b060ff']][S.dim];stage.style.background='linear-gradient('+c[0]+','+c[1]+')';stage.style.setProperty('--mc',c[2])}
+function tex(i){if(cache[i])return cache[i];var b=BL[i],c=document.createElement('canvas');c.width=c.height=16;var x=c.getContext('2d'),r=rng(i*977+13),st=b[5]==='808080'||b[5]==='4a4a52';
+ for(var y=0;y<16;y++)for(var u=0;u<16;u++){var s=((r()+r())*24-24)|0,k=rgb(b[5]);if(b[7]==='l')s+=u%4<1?-26:(u%4===2?10:0);if(b[7]==='d'&&y<3+(u*7%3)){k=[88,158,60];s=(r()*24-12)|0}
+  if(u===0||y===0)s+=26;if(u===15||y===15)s-=34;x.fillStyle='rgb('+k.map(function(v){return Math.max(0,Math.min(255,v+s))})+')';x.fillRect(u,y,1,1)}
+ if(st){x.fillStyle='rgba(0,0,0,.28)';for(var j=0;j<3;j++){var qx=r()*11+2|0,qy=r()*11+2|0;x.fillRect(qx,qy,3,1);x.fillRect(qx+2,qy+1,1,2)}}
+ if(b[6])for(var j=0;j<6;j++){var px=r()*11+2|0,py=r()*11+2|0;x.fillStyle='#000a';x.fillRect(px-1,py-1,4,4);x.fillStyle='#'+b[6];x.fillRect(px,py,2,2);x.fillRect(px+1,py+1,1,1);x.fillStyle='#fff9';x.fillRect(px,py,1,1)}
+ return cache[i]=c}
+var PIMG=(function(){var m=['...hhhhhh...','..hhhhhhhh..','..hhhhhhhh..','..sgsssgss..','..ssssssss..','..sssnnsss..','..sssnnsss..','..ssssssss..','.bbbbbbbbbb.','.bssssssssb.','.bssssssssb.','.bbbbbbbbbb.','.bbbbbbbbbb.','.bbbbbbbbbb.','..hh....hh..','..hh....hh..'],cl={h:'#3a2a1a',s:'#c48b66',g:'#2f9c4a',n:'#9a6240',b:'#6e4a2a'},c=document.createElement('canvas');c.width=12;c.height=16;var x=c.getContext('2d');m.forEach(function(r,y){for(var u=0;u<12;u++){if(r[u]!=='.'){x.fillStyle=cl[r[u]];x.fillRect(u,y,1,1)}}});return '<img class="spr" alt="" src="'+c.toDataURL()+'">'})();
+$('peter').children[0].innerHTML=PIMG;
+var ACTN=[['Aldea en ruinas','🏚','#6b4f2a'],['Bosque oscuro','🌲','#1f4a2a'],['Minas olvidadas','⛏','#555555'],['Cuevas de cristal','💎','#1b4a66'],['Pantano de brujas','🧙','#3a4a22'],['Desierto del templo','🏜','#8a6a2a'],['Montañas nevadas','🏔','#5a7a99'],['Bastión del Nether','🔥','#7a2a22'],['Ciudad antigua','🏛','#6a5a7a'],['Islas del End','🌌','#3a2468']],sv=0,av=-1;
+function renderSt(){var cur=Math.min(9,Math.floor(S.st/20)),A=av<0?cur:av,h='<div class="track"><span class="pp" style="left:'+Math.min(94,S.st/ST.length*94)+'%">'+PIMG+'</span><span class="eg">🥚</span></div>';
+ h+='<div class="tabs"><button class="btn'+(sv?'':' on')+'" data-a="s0">Capítulos '+S.st+'/'+ST.length+'</button><button class="btn'+(sv?' on':'')+'" data-a="s1">Misiones '+S.sqa.length+'/2</button></div>';
+ if(!sv){h+='<div class="tabs">'+ACTN.map(function(a,i){return '<button class="btn'+(i===A?' on':'')+(i*20>S.st?' lock':'')+'" data-a="v'+i+'" title="'+a[0]+'">'+a[1]+'</button>'}).join('')+'</div>';
+  var d=ACTN[A],dn=Math.max(0,Math.min(20,S.st-A*20));h+='<div class="acth" style="--ac:'+d[2]+'"><b>'+d[1]+' Acto '+(A+1)+': '+d[0]+'</b>'+dn+'/20 capítulos<div class="bar" style="width:100%;margin-top:6px"><i style="width:'+dn*5+'%"></i></div></div>';
+  for(var i=A*20;i<A*20+20;i++){var c=ST[i];if(i<S.st)h+='<div class="ch done">✔ <b>Cap. '+(i+1)+'</b> '+c[0]+'</div>';else if(i===S.st)h+='<div class="ch cur">▶ <b>Cap. '+(i+1)+'</b> '+c[0]+'<br>'+c[1]+(c[4]?'<div class="bar" style="width:100%;margin-top:6px"><i style="width:'+Math.floor(c[4]()*100)+'%"></i></div>':'')+(c[3]?'<span class="sub">Premio: '+fmt(c[3])+'</span>':'')+'</div>';else h+='<div class="ch lk">🔒 Cap. '+(i+1)+'</div>'}
+ }else{h+='<p class="sub" style="margin:4px 0 6px">Hechas: '+S.sqd+' (+1% global cada una)</p>';
+  S.sqa.forEach(function(q,i){var p=Math.max(0,Math.min(1,(MET[q.t]()-q.base)/q.n));h+='<div class="a got" style="opacity:1;margin-bottom:6px"><b>⚔ Activa</b>'+SQL[q.t]+' '+fmt(q.n)+' · premio '+fmt(q.r)+'<div class="bar" style="width:100%;margin-top:6px"><i style="width:'+Math.floor(p*100)+'%"></i></div><button class="btn" data-a="x'+i+'" style="margin-top:6px">Abandonar</button></div>'});
+  if(!S.sqo||!S.sqo.length)newOffers();
+  S.sqo.forEach(function(q,i){h+='<div class="a" style="opacity:1;margin-bottom:6px"><b>📜 Oferta</b>'+SQL[q.t]+' '+fmt(q.n)+' · premio '+fmt(q.r)+'<br><button class="btn" data-a="a'+i+'" style="margin-top:6px">Aceptar</button></div>'});h+='<button class="btn" data-a="r">Nuevas ofertas</button>'}
+ $('t4').innerHTML=h}
+$('t4').onclick=function(e){var b=e.target.closest('[data-a]');if(!b)return;var a=b.dataset.a,i=+a.slice(1);
+ if(a[0]==='s')sv=i;else if(a[0]==='v')av=i;else if(a[0]==='a'){if(S.sqa.length>=2){toast('Máximo 2 misiones activas');return}var q=S.sqo.splice(i,1)[0];q.base=MET[q.t]();S.sqa.push(q);S.sqo.push(mkQ());beep(600,.1)}else if(a[0]==='x')S.sqa.splice(i,1);else newOffers();save();renderSt()};
+var PL=['El Creeper no me dejó ni una cama.','Los diamantes brillan más que mis ahorros.','Huele a azufre... ¿o soy yo?','Sé que el huevo está en el End.','¡Sigue picando, jefe!','Ese bloque tiene mala pinta.'];
+$('peter').onclick=function(){var n=Date.now();if(n-S.pt<30000){say('Estoy descansando... '+Math.ceil((30000-(n-S.pt))/1000)+'s');return}S.pt=n;var g=Math.max(cps()*30,clickBase()*20);S.e+=g;S.earned+=g;say(PL[Math.random()*PL.length|0]+' (+'+fmt(g)+')');arp([440,554,659]);render()};
+/* HUDs */
+var TH=[['HUD Clásico',{},['#2b241d','#3a3027','#5a4a3a','#3fe07a'],'🎨'],['HUD Bosque',{1:30},['#222d1c','#31402a','#4f6a3e','#8be04a'],'🌲'],['HUD Piedra',{2:60},['#2a2d31','#3b4046','#5b636c','#9ad0ff'],'🪨'],['HUD Oro',{5:20},['#3a2f12','#4d3e18','#7a6226','#ffd84a'],'🥇'],['HUD Diamante',{6:15},['#12303a','#1b4452','#2f7284','#5decf5'],'💎'],['HUD Redstone',{10:25},['#3a1414','#4f1c1c','#7e2d2d','#ff5a5a'],'🔴'],['HUD Obsidiana',{19:20},['#221638','#33224f','#563a82','#c47bff'],'🟣']];
+function cstr(c){return Object.keys(c).map(function(k){return c[k]+' '+BL[k][1]}).join(', ')||'Gratis'}
+function can(c){return Object.keys(c).every(function(k){return(S.m[k]||0)>=c[k]})}
+function applyTh(){var c=TH[S.tc][2],r=document.documentElement.style;['--panel','--p2','--hi','--em'].forEach(function(v,i){r.setProperty(v,c[i])})}
+var thEl=TH.map(function(t,i){return item(t[3],$('t5'),function(){if(S.th.indexOf(i)<0){if(!can(t[1]))return;Object.keys(t[1]).forEach(function(k){S.m[k]-=t[1][k]});S.th.push(i);arp([523,784,1047],'triangle')}S.tc=i;applyTh();save();render()})});
+function rTh(){TH.forEach(function(t,i){var o=S.th.indexOf(i)>=0;upd(thEl[i],t[0],o?'Desbloqueado':'Cuesta: '+cstr(t[1])+' (recursos picados)',o?(S.tc===i?'EN USO':'USAR'):'COMPRAR',!o&&!can(t[1]))})}
+/* ajustes */
+function applySet(){document.body.classList.toggle('round',!!S.rd);document.body.style.fontSize=S.fs+'px'}
+function tg(l,g,s){var b=document.createElement('button');b.className='btn';b.style.cssText='display:block;margin-bottom:8px;width:100%';function u(){b.textContent=l+': '+g()}b.onclick=function(){s();u();save();applySet()};u();$('t6').appendChild(b)}
+tg('Partículas',function(){return S.fx?'SÍ':'NO'},function(){S.fx=S.fx?0:1});
+tg('Temblor en críticos',function(){return S.sh?'SÍ':'NO'},function(){S.sh=S.sh?0:1});
+tg('Esquinas',function(){return S.rd?'REDONDAS':'PIXEL'},function(){S.rd=S.rd?0:1});
+tg('Tamaño de texto',function(){return S.fs+'px'},function(){S.fs=S.fs>=27?17:S.fs+2});
+tg('Copiar guardado',function(){return 'JSON'},function(){try{navigator.clipboard.writeText(JSON.stringify(S));toast('Guardado copiado')}catch(x){}});
+var BK='mct2_bak',armI=0;
+function bl(){try{return JSON.parse(localStorage.getItem(BK)||'[]')}catch(x){return[]}}
+function bak(w){try{var l=bl();if(w==='automática'&&l[0]&&l[0].w===w)l.shift();l.unshift({t:Date.now(),w:w,s:JSON.stringify(S)});localStorage.setItem(BK,JSON.stringify(l.slice(0,5)))}catch(x){}}
+function wrap(){return JSON.stringify({juego:'minecraft-tycoon',version:2,fecha:new Date().toISOString(),datos:S})}
+function okImp(d){if(!d||!d.b||d.b.length!==BD.length)return false;if((d.earned||0)<S.earned*.5&&!armI){armI=1;setTimeout(function(){armI=0},8000);toast('⚠ Este guardado tiene menos progreso que el actual. Repite la importación para confirmar');return false}armI=0;return true}
+function stamp(){var d=new Date(),p=function(n){return(n<10?'0':'')+n};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())}
+async function exportFile(){var t=wrap(),n='minecraft-tycoon-'+stamp()+'.json';save();
+ try{if(window.showSaveFilePicker){var h=await showSaveFilePicker({suggestedName:n,types:[{description:'Guardado de Minecraft Tycoon',accept:{'application/json':['.json']}}]});var w=await h.createWritable();await w.write(t);await w.close();toast('Guardado en tu equipo: '+h.name);return}}catch(x){if(x&&x.name==='AbortError')return}
+ try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'application/json'}));a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},3000)}catch(x){}
+ try{await navigator.clipboard.writeText(t)}catch(x){}toast('Exportado '+n+' (copia también en el portapapeles)')}
+async function importFile(fi){try{if(window.showOpenFilePicker){var h=await showOpenFilePicker({types:[{description:'Guardado de Minecraft Tycoon',accept:{'application/json':['.json']}}]});var f=await h[0].getFile();imp(await f.text());return}}catch(x){if(x&&x.name==='AbortError')return}fi.click()}
+document.addEventListener('visibilitychange',function(){if(document.hidden)save()});window.addEventListener('pagehide',save);setInterval(function(){bak('automática')},6e5);bak('automática');
+function imp(t,nb){try{var d=JSON.parse(t);d=d&&d.datos?d.datos:d;if(!nb&&!okImp(d))return;if(!nb)bak('antes de importar');if(!d||!d.b||d.b.length!==BD.length)throw 0;S=d;fix();S.bi=S.bi<BL.length?S.bi:0;save();applyTh();applySet();ld=-1;draw();renderSt();render();checkAch();toast('Partida importada')}catch(x){toast('Guardado no válido')}}
+tg('Exportar a archivo',function(){return 'guardar como...'},function(){exportFile();return;var t=JSON.stringify(S);try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'application/json'}));a.download='minecraft-tycoon-guardado.json';document.body.appendChild(a);a.click();a.remove()}catch(x){}try{navigator.clipboard.writeText(t)}catch(x){}toast('Exportado (también copiado al portapapeles)')});
+var fi=document.createElement('input');fi.type='file';fi.accept='.json,application/json';fi.hidden=true;fi.onchange=function(){var f=fi.files[0];if(!f)return;var r=new FileReader();r.onload=function(){imp(r.result)};r.readAsText(f);fi.value=''};$('t6').appendChild(fi);
+tg('Importar desde archivo',function(){return '.json'},function(){importFile(fi)});
+var ta=document.createElement('textarea');ta.placeholder='Pega aquí un guardado copiado...';ta.setAttribute('aria-label','Guardado en texto');ta.style.cssText='width:100%;height:60px;background:var(--p2);color:var(--text);border:3px solid var(--line);font:16px monospace;margin-bottom:8px';$('t6').appendChild(ta);
+tg('Importar texto pegado',function(){return 'pegar'},function(){imp(ta.value)});
+tg('Restaurar copia automática',function(){var l=bl();return l.length?new Date(l[0].t).toLocaleTimeString().slice(0,5)+' ('+l[0].w+')':'ninguna'},function(){var l=bl();if(!l.length){toast('No hay copias todavía');return}var s=l[0].s;bak('antes de restaurar');imp(s,1)});
+/* taller y mascotas */
+var lk=0,ab=0,crEl,ptEl;function ci(i){return S.cf&&S.cf[i]}function pet(i){return S.pets&&S.pets[i]}
+var CR=[['Yunque','🔨',{4:40,3:20},'p','+20% por golpe'],['Brújula','🧭',{4:10,10:6},'p','Los bonus aparecen el doble de rápido'],['Guantes de minero','🧤',{8:20,4:10},'p','El combo llega hasta x7'],['Mesa de encantamientos','📖',{9:8,6:3,2:10},'p','Críticos x7 en vez de x5'],['Faro','🔆',{6:3,19:10,15:5},'p','+25% a todo'],['Cofre del Ender','📦',{19:15,15:8,20:8},'p','Ganancias sin conexión x2'],['Amuleto marino','🌊',{26:2,24:20,23:30},'p','+40% a edificios'],['Cetro del vacío','🪄',{36:6,35:20,37:1},'p','Bloques de dimensiones 4+ valen x2'],['Poción de frenesí','🧪',{5:5,9:3},'c','Golpes x7 durante 30 s'],['Poción de suerte','🍀',{1:20,9:4},'c','+30% de crítico durante 60 s'],['TNT','💥',{10:8,13:6},'c','Pica 30 bloques de golpe'],['Mapa del tesoro','🗺',{9:10,1:15},'c','Hace aparecer un bonus']];
+var PT=[['Lobo','🐺',{0:40,2:30},'+10% por golpe'],['Gato','🐱',{1:25,3:10},'+4% de crítico'],['Loro','🦜',{4:15,7:10},'El combo cae a media velocidad'],['Zorro','🦊',{5:10,11:3},'Los cofres dan el doble'],['Caballo','🐴',{3:40,4:20},'+15% a edificios'],['Delfín','🐬',{24:30,25:15},'+10% a todo'],['Abeja','🐝',{8:15,9:10},'Pica sola cada 1,5 s'],['Dragón bebé','🐲',{37:3,33:8},'+50% a todo']];
+function boom(){var g=30*BL[S.bi][2]*clickBase();S.e+=g;S.earned+=g;S.tot+=30;S.m[S.bi]=(S.m[S.bi]||0)+30;burst(innerWidth/2,innerHeight/3,'#ff7a2a',40);if(S.sh){var w=$('wrap');w.classList.remove('shake');void w.offsetWidth;w.classList.add('shake')}toast('💥 +'+fmt(g))}
+function auto(){var g=BL[S.bi][2]*PK[S.pick][2]*(1+.25*S.up[0])*G();S.e+=g;S.earned+=g;S.tot++;S.m[S.bi]=(S.m[S.bi]||0)+1;S.bi=nextBlock();draw()}
+function pay(c){Object.keys(c).forEach(function(k){S.m[k]-=c[k]})}
+function craft(i){var c=CR[i];if(c[3]==='p'&&S.cf[i])return;if(i===11&&bonusOn){toast('Ya hay un bonus en pantalla');return}if(!can(c[2])){toast('Te faltan recursos');return}pay(c[2]);if(c[3]==='p')S.cf[i]=1;else if(i===8)fz=30;else if(i===9)lk=60;else if(i===10)boom();else spawn();arp([392,523,784],'triangle');toast('Creaste: '+c[0]);save();render()}
+function tame(i){var p=PT[i];if(S.pets[i])return;if(!can(p[2])){toast('Te faltan ofrendas');return}pay(p[2]);S.pets[i]=1;arp([523,659,784,1047],'triangle');say(p[1]+' ¡'+p[0]+' ahora te sigue!');toast('Domesticaste: '+p[0]);save();render()}
+crEl=CR.map(function(c,i){return item(c[1],$('t7'),function(){craft(i)})});
+ptEl=PT.map(function(p,i){return item(p[1],$('t8'),function(){tame(i)})});
+var lastP='';function rCr(){if(!crEl)return;CR.forEach(function(c,i){var o=c[3]==='p'&&S.cf[i];upd(crEl[i],c[0]+(c[3]==='c'?' (un uso)':''),o?'Ya lo tienes: '+c[4]:c[4]+' · '+cstr(c[2]),o?'HECHO':'CRAFTEAR',!o&&!can(c[2]));crEl[i].classList.toggle('max',!!o)});
+ PT.forEach(function(p,i){var o=S.pets[i];upd(ptEl[i],p[0],o?'Domesticado: '+p[3]:p[3]+' · Ofrenda: '+cstr(p[2]),o?'AMIGO':'DOMAR',!o&&!can(p[2]));ptEl[i].classList.toggle('max',!!o)});
+ var h=PT.map(function(p,i){return S.pets[i]?'<span class="pt" style="animation-delay:'+i*.12+'s" title="'+p[0]+'">'+p[1]+'</span>':''}).join('');if(h!==lastP){lastP=h;$('pets').innerHTML=h}}
+/* herramientas, armas y dureza */
+BL.push([99,'Zombi',100,0,0,'4a8a4a','1a2a1a','z'],[99,'Esqueleto',100,0,0,'c8c8c8','222222','s'],[99,'Araña',100,0,0,'3a2a2a','ff2222','a'],[99,'Creeper',100,0,0,'3fbf3f','0a2a0a','c']);
+var _tx=tex;tex=function(i){var b=BL[i];if(b[0]!==99)return _tx(i);if(cache[i])return cache[i];var c=document.createElement('canvas');c.width=c.height=16;var x=c.getContext('2d'),r=rng(i*31+7),k0=rgb(b[5]);
+ for(var y=0;y<16;y++)for(var u=0;u<16;u++){var s=((r()+r())*18-18)|0;if(u===0||y===0)s+=24;if(u===15||y===15)s-=30;x.fillStyle='rgb('+k0.map(function(v){return Math.max(0,Math.min(255,v+s))})+')';x.fillRect(u,y,1,1)}
+ x.fillStyle='#'+b[6];var d=b[7];if(d==='z'||d==='s'){x.fillRect(3,5,3,3);x.fillRect(10,5,3,3);x.fillRect(6,10,4,2);if(d==='s')x.fillRect(7,8,2,2)}
+ if(d==='c'){x.fillRect(3,4,3,3);x.fillRect(10,4,3,3);x.fillRect(6,8,4,4);x.fillRect(5,11,2,3);x.fillRect(9,11,2,3)}
+ if(d==='a')[[3,4],[5,3],[9,3],[11,4],[4,7],[10,7]].forEach(function(p){x.fillRect(p[0],p[1],2,2)});
+ return cache[i]=c};
+function ev(){var s=0,w=0;BL.forEach(function(b){if(b[0]===S.dim){s+=b[2]*b[4];w+=b[4]}});return w?s/w:10}
+var _nb=nextBlock;nextBlock=function(){if(S.tot>=15&&Math.random()<.1){var m=38+(Math.random()*4|0);BL[m][2]=ev()*8;return m}return nbk()};
+var TL=[['Pico','⛏','Rompe piedra y minerales'],['Pala','🥄','Rompe tierra y arena'],['Hacha','🪓','Rompe troncos'],['Azada','🌱','Rompe coral y frutos'],['Espada','🗡','Ataca zombis y arañas'],['Arco','🏹','Dispara a esqueletos y creepers']],TN=['Mano','Madera','Piedra','Hierro','Diamante','Netherita','Cósmico'],TC=['#14100c','#8a6a3a','#9a9a9a','#e8e8e8','#5decf5','#6a3a5a','#b060ff'],TM=[1,2,4,6,16,17],TA=[5,8,10,8,6,5],TF=[1.5,.7,1.4,1,1.2,1],SP=[1,1.6,2.2,3,4.5,6.5,9],MH=[5,4,4,6],DUR=[0,60,120,220,400,650,1000];PK=[['Mano',0,1],['Madera',0,2],['Piedra',0,4],['Hierro',0,8],['Diamante',0,16],['Netherita',0,40],['Cósmico',0,120]];
+function toolFor(i){var b=BL[i];if(b[0]===99)return[4,5,4,5][i-38];if(i===1)return 2;if(i===0||i===14||i===23||i===31)return 1;if(i===21||i===25)return 3;return 0}
+function tcost(t,k){var c={};c[TM[k-1]]=Math.ceil(TA[k-1]*TF[t]);if(k>=2)c[1]=(c[1]||0)+3;return c}
+function syn(){S.pick=S.tl[0]}
+var lastT=0;function wear(t){if(!S.tl[t])return;S.td[t]--;if(S.td[t]<=0){var n=TL[t][0]+' de '+TN[S.tl[t]];S.cs[t]=S.tl[t];S.tl[t]=0;S.td[t]=0;syn();beep(90,.3,'sawtooth',.08);burst(innerWidth/2,innerHeight/3,'#c8a060',30);toast('💥 ¡Se rompió tu '+n+'!')}}
+function need(){var i=S.bi,t=toolFor(i),sp=SP[S.tl[t]]*(t===0?1+.1*S.pick:1),h=BL[i][0]===99?MH[i-38]:1+BL[i][3]+(i===1?1:0);return Math.max(1,Math.ceil(h/sp))}
+var hits=0,cur=-1,CK=[[8,8],[7,8],[7,7],[6,7],[6,6],[9,8],[10,9],[10,10],[11,10],[5,8],[4,9],[4,10],[8,9],[8,10],[9,11],[8,5],[9,4],[9,3],[12,7],[13,7]];
+function crack(p){draw();var n=Math.floor(p*CK.length);cx.fillStyle='rgba(0,0,0,.6)';for(var j=0;j<n;j++)cx.fillRect(CK[j][0],CK[j][1],1,1)}
+function hit1(){if(cur!==S.bi){cur=S.bi;hits=0}var b0=BL[S.bi];if(!okb(S.bi)){beep(80,.12,'sawtooth',.06);toast(nmsg(S.bi));S.bi=nextBlock();cur=-1;draw();hud();return false}var n=need();hits++;
+ if(hits<n){var now=Date.now();combo=now-lastC<1100?combo+1:1;lastC=now;if(combo>S.bc)S.bc=combo;beep(110+hits*40,.05,'triangle');crack(hits/n);var br=blk.getBoundingClientRect();burst(br.left+br.width/2,br.top+br.height/2,'#'+(BL[S.bi][6]||BL[S.bi][5]),4);blk.classList.remove('hit');void blk.offsetWidth;blk.classList.add('hit');hud();return false}
+ hits=0;lastT=toolFor(S.bi);return true}
+var hotEl=TL.map(function(t){var d=document.createElement('div');d.className='slot';d.title=t[0];d.innerHTML=t[1]+'<small></small>';$('hot').appendChild(d);return d});
+var tlEl=[],tbEl=[];pkEl.style.display='none';
+$('t9').innerHTML='<p class="sub" style="margin:0 0 8px">Empiezas sin nada. Cada herramienta aparece aquí cuando reúnes los materiales para fabricarla (pica tronco, tierra y piedra). Se desgastan y se rompen. Elige el material (M P H D N C) y fabrícalo.</p>';
+TL.forEach(function(x,i){var w=document.createElement('div');w.style.marginBottom='10px';var tr=document.createElement('div');tr.className='tabs';tr.style.marginBottom='4px';
+ tbEl.push([1,2,3,4,5,6].map(function(k){var b=document.createElement('button');b.className='btn';b.textContent=TN[k][0];b.title=TN[k];b.onclick=function(){S.cs[i]=k;render()};tr.appendChild(b);return b}));
+ w.appendChild(tr);tlEl.push(item(x[1],w,function(){craftT(i)}));$('t9').appendChild(w)});
+function craftT(i){var k=S.cs[i],c=tcost(i,k);if(k>S.tb[i]+1){toast('Antes crea la de '+TN[S.tb[i]+1]);return}if(S.tl[i]>k){toast('Ya tienes una mejor');return}if(!can(c)){toast('Te faltan materiales');return}
+ pay(c);S.tl[i]=k;S.td[i]=DUR[k];if(k>S.tb[i])S.tb[i]=k;S.cs[i]=Math.min(6,k+1);syn();arp([440,660,880],'triangle');toast(TL[i][0]+' de '+TN[k]+' creado');save();render()}
+function okb(i){var b=BL[i];if(b[0]===99||i===0||i===1)return true;var t=toolFor(i);return t===0?S.tl[0]>=b[3]:S.tl[t]>0}
+function nmsg(i){var t=toolFor(i);return t===0?'⛏ Necesitas pico de '+TN[BL[i][3]]+' o mejor':'Necesitas: '+TL[t][0]}
+function nbk(){var p=[],tw=0;BL.forEach(function(b,i){if(b[0]===S.dim&&okb(i)){p.push(i);tw+=b[4]}});if(!p.length){p=[0,1];tw=BL[0][4]+BL[1][4]}var r=Math.random()*tw;for(var j=0;j<p.length;j++){r-=BL[p[j]][4];if(r<=0)return p[j]}return p[0]}
+function vis(i){var r=[];for(var k=1;k<=6;k++){var key=i+':'+k;if(k<=S.tb[i]+1&&can(tcost(i,k)))S.ud[key]=1;if(S.ud[key]||k<=S.tb[i])r.push(k)}return r}
+function hud(){if(!hotEl)return;if(cur!==S.bi){cur=S.bi;hits=0}var t=toolFor(S.bi),b=BL[S.bi];
+ hotEl.forEach(function(e,i){e.className='slot'+(i===t?' on':'');e.style.borderColor=i===t?'#e8b64a':TC[S.tl[i]];e.querySelector('small').textContent=S.tl[i]?S.td[i]:'';e.style.display=S.tl[i]?'':'none'});
+ var nm=S.tl[t]?TL[t][0]+' '+TN[S.tl[t]]+' ('+S.td[t]+'/'+DUR[S.tl[t]]+')':'Mano';
+ $('hn').textContent=!okb(S.bi)?'⛔ '+nmsg(S.bi):nm+' · golpe '+(hits+1)+'/'+need();
+ TL.forEach(function(x,i){var v=vis(i);tlEl[i].parentNode.style.display=v.length?'':'none';if(!v.length)return;if(v.indexOf(S.cs[i])<0)S.cs[i]=v[v.length-1];var k=S.cs[i],c=tcost(i,k),lock=k>S.tb[i]+1;
+  tbEl[i].forEach(function(e,j){e.style.display=v.indexOf(j+1)<0?'none':'';e.classList.toggle('on',j+1===k);e.classList.toggle('lock',j+1>S.tb[i]+1)});
+  upd(tlEl[i],x[0]+' de '+TN[k],(S.tl[i]?'Llevas '+TN[S.tl[i]]+' ('+S.td[i]+'/'+DUR[S.tl[i]]+')':'No tienes')+' · '+x[2]+' · x'+SP[k]+' · dur. '+DUR[k],lock?'🔒':cstr(c),lock||!can(c)||S.tl[i]>k);
+  tlEl[i].classList.toggle('max',S.tl[i]===k)})}
+/* bucle */
+$('snd').onclick=function(){S.mute=S.mute?0:1;$('snd').textContent=S.mute?'🔇':'🔊'};$('snd').textContent=S.mute?'🔇':'🔊';
+var rt,ra=0;$('reset').onclick=function(){if(!ra){ra=1;$('reset').textContent='¿Seguro?';rt=setTimeout(function(){ra=0;$('reset').textContent='Reiniciar'},3000)}else{bak('antes de reiniciar');S=def();fix();S.bi=0;save();applyTh();applySet();renderSt();draw();render();checkAch();ra=0;$('reset').textContent='Reiniciar'}};
+var last=Date.now(),sv=0;
+if(S.t){var off=Math.min((last-S.t)/1000,7200);if(off>30&&cps()>0){var g=cps()*off*.5*(ci(5)?2:1);S.e+=g;S.earned+=g;setTimeout(function(){toast('Mientras no estabas: +'+fmt(g))},600)}}
+setInterval(function(){var n=Date.now(),dt=(n-last)/1000;last=n;var c=cps();if(fz>0)fz-=dt;if(lk>0)lk-=dt;if(pet(6)){ab+=dt;if(ab>1.5){ab=0;auto()}}if(c>0){S.e+=c*dt;S.earned+=c*dt}
+ if(n-lastC>1100)combo=Math.max(0,combo-dt*(pet(2)?30:60));
+ var cm=Math.min(combo,100);$('cb').style.width=cm+'%';$('cb').style.background=cm>=100?'#e8b64a':'#3fe07a';$('ct').textContent=combo>2?'COMBO x'+cmult().toFixed(1):'';
+ $('glow').style.setProperty('--o',Math.min(1,cm/60));$('fr').textContent=fz>0?'🔥 FRENESÍ x7: '+Math.ceil(fz)+'s':'';
+ render();sv+=dt;if(sv>4){sv=0;checkAch();save()}},100);
+window.addEventListener('beforeunload',save);
+S.bi=S.bi<BL.length?S.bi:0;applyTh();applySet();renderSt();say(S.st<ST.length?ST[S.st][1]:'¡Tenemos el huevo!');draw();render();checkAch();
+})();
+</script>
+</body>
+</html>
