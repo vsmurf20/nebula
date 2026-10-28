@@ -65,3 +65,11 @@ El plan gratuito de Formspree indica un límite de 50 envíos al mes y 30 días 
 ## Juegos integrados
 - `Party Island`: registrado como disponible en `games.js`, con ruta `games/party-island/index.html`.
 - Icono de pestaña (favicon): `assets/nebula-icon.svg`, compartido por todas las páginas principales.
+
+
+## Juegos añadidos (28 oct 2026)
+
+- **Sala de cartas**: `games/sala-de-cartas/index.html` (blackjack y solitario).
+- **Trébol Roto**: `games/trebol-roto/index.html` (juego arcade de rondas y tiradas).
+
+Ambos juegos están registrados como disponibles en `games.js`.

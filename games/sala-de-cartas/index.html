@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sala de cartas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@600;800&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e9edf0;--ink:#16202a;--mute:#5b6a77;--panel:#fff;--line:#c9d2d9;--gold:#c9973f;--card:#fbf7ec;--red:#b3261e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10161c;--ink:#e8edf1;--mute:#93a2af;--panel:#1a232c;--line:#2c3844;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10161c;--ink:#e8edf1;--mute:#93a2af;--panel:#1a232c;--line:#2c3844;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 "Instrument Sans",system-ui,sans-serif}
+[hidden]{display:none!important}
+.wrap{max-width:780px;margin:0 auto;padding:16px}
+header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+h1{font:800 28px "Bodoni Moda",Georgia,serif;margin:0}
+button{font-family:inherit;font-weight:600;font-size:15px;border:0;border-radius:10px;padding:10px 16px;background:var(--gold);color:#241a08;cursor:pointer}
+button:hover{filter:brightness(1.07)}button:disabled{opacity:.4;cursor:default}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+button.ghost{background:var(--panel);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.desc{color:var(--mute);margin:0 0 14px}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mcard{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:18px;background:var(--panel);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line);border-radius:18px;position:relative;overflow:hidden;min-height:150px}
+.mcard i{position:absolute;right:12px;top:-6px;font:normal 800 84px "Bodoni Moda",serif;opacity:.1}
+.mcard b{font:800 22px "Bodoni Moda",Georgia,serif}
+.mcard small{font-size:12px;font-weight:600;color:var(--gold)}
+.mcard span{font-size:13.5px;color:var(--mute);font-weight:400}
+.mcard.main{grid-column:1/-1;background:radial-gradient(ellipse at 30% 30%,#237a5c,#124434);color:#f3efe3;box-shadow:0 0 0 3px #3b2a17;min-height:190px}
+.mcard.main span{color:#d9e6df;font-size:15px;max-width:44ch}.mcard.main b{font-size:32px}.mcard.main small{color:#f1cf8a;font-size:13px}.mcard.main i{opacity:.18;font-size:150px}
+@media (max-width:520px){.menu{grid-template-columns:1fr}}
+.table{background:radial-gradient(ellipse at 50% 40%,#237a5c,#124434 75%);border-radius:28px;padding:14px 12px;border:6px solid #3b2a17;color:#f3efe3;display:flex;flex-direction:column;gap:10px;min-height:440px;justify-content:space-between;--cw:clamp(46px,12vw,64px);--ch:calc(var(--cw)*1.42)}
+.table.bjt{--cw:clamp(40px,10.5vw,58px)}
+.seat,.mid{display:flex;flex-direction:column;align-items:center;gap:6px}
+.bar{display:flex;align-items:center;gap:8px;background:#0006;border-radius:999px;padding:4px 14px 4px 5px;font-size:14px}
+.av{width:32px;height:32px;border-radius:50%;background:#f1cf8a;color:#241a08;display:grid;place-items:center;font:800 14px "Bodoni Moda",serif}
+.stack{font:800 18px "Bodoni Moda",serif;color:#f1cf8a}
+.coin,.chip{display:inline-block;width:14px;height:14px;border-radius:50%;background:#c0392b;box-shadow:inset 0 0 0 2px #fff8,0 1px 2px #0008;vertical-align:-2px;margin-right:4px}
+.tag{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;background:#f3efe3;color:#16202a}
+.tag.d{background:var(--gold);color:#241a08}
+.think{font-size:12px;opacity:.85;min-height:16px}
+.hand{display:flex;justify-content:center;gap:6px;min-height:calc(var(--ch) + 4px);flex-wrap:wrap}
+.bet{min-height:24px;font-weight:600;font-size:14px;background:#0005;border-radius:999px;padding:1px 12px}.bet:empty{visibility:hidden}
+.card{width:var(--cw);height:var(--ch);background:var(--card);color:#14181c;border-radius:7px;position:relative;box-shadow:0 2px 6px #0006;font:800 calc(var(--cw)*.3) "Bodoni Moda",Georgia,serif;line-height:1.05;animation:deal .3s ease-out;user-select:none}
+.card span{position:absolute;top:4px;left:5px;text-align:center}
+.card span.br{top:auto;left:auto;bottom:4px;right:5px;transform:rotate(180deg)}
+.card em{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-size:calc(var(--cw)*.5)}
+.card.red{color:var(--red)}
+.card.back{background:repeating-linear-gradient(45deg,#7a1f2b 0 6px,#5e1620 6px 12px);border:3px solid var(--card)}
+.card.slot{background:#0003;box-shadow:inset 0 0 0 2px #fff2;animation:none}
+.card.sel{transform:translateY(-12px);box-shadow:0 0 0 3px var(--gold),0 4px 8px #0006}
+#h0 .card{cursor:pointer}
+.pot{font-size:14px;background:#0006;border-radius:999px;padding:3px 14px}.pot b{font:800 20px "Bodoni Moda",serif;color:#f1cf8a}
+.stage{font-size:13px;opacity:.85;min-height:18px}
+.hud{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-top:12px}
+@media (max-width:560px){.hud{grid-template-columns:1fr}}
+.panel{background:var(--panel);border-radius:14px;padding:12px 14px;box-shadow:inset 0 0 0 1.5px var(--line);font-size:14px}
+.meter{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:8px 0 4px}.meter i{display:block;height:100%;background:linear-gradient(90deg,#c0392b,var(--gold),#2e9e6b);transition:width .4s}
+.log{list-style:none;margin:0;padding:0;max-height:110px;overflow:auto;color:var(--mute);font-size:13px}.log li:last-child{color:var(--ink);font-weight:600}
+.msg{min-height:46px;margin:12px 0 4px;font-weight:600}
+.ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.rz{display:flex;flex-direction:column;gap:8px;flex:1 1 100%}.rz .qs,.rz .rs{display:flex;gap:8px;align-items:center}.rz .qs button{padding:6px 12px;font-size:13px}.rz input{flex:1;accent-color:var(--gold)}
+.chips button{background:var(--panel);color:var(--ink);box-shadow:inset 0 0 0 2px var(--gold);border-radius:999px;min-width:56px}
+.hg{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 8px;border-radius:14px}.hg.act{background:#0004;box-shadow:0 0 0 2px var(--gold)}
+.lab{font-size:12.5px}.lab b{margin-left:6px;color:#f1cf8a}
+.bjrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+details{margin-top:14px;color:var(--mute);font-size:14px}summary{cursor:pointer;color:var(--ink);font-weight:600}
+.hd{grid-column:1/-1;margin:14px 0 0;font:800 18px "Bodoni Moda",Georgia,serif}
+.kt{--cw:clamp(38px,11vw,74px);padding:12px 8px;justify-content:flex-start;min-height:540px}
+.ktop,.kcols{display:grid;grid-template-columns:repeat(7,var(--cw));gap:6px;justify-content:space-between}.ktop{margin-bottom:16px}
+.col{position:relative;min-height:var(--ch);border-radius:7px;background:#0002}.kw{position:absolute;left:0;right:0}
+.kw .card,.ktop .card{animation:none}.cell{cursor:pointer}.cell .card.slot em{color:#fff;opacity:.5}
+.card{background:linear-gradient(#fffdf6,#f3ead6);border:1px solid #cdbf9d}.card.slot{border:0}
+.sp::after{content:"";position:absolute;inset:3px;border:1px solid #b9964a66;border-radius:5px;pointer-events:none}
+.sp .cn{position:absolute;top:3px;left:4px;display:flex;flex-direction:column;align-items:center;font-size:calc(var(--cw)*.26);line-height:1;color:#2a2014}
+.sp .cn.br{top:auto;left:auto;bottom:3px;right:4px;transform:rotate(180deg)}
+.sp .cs{width:calc(var(--cw)*.2);height:calc(var(--cw)*.2)}
+.sp .pp{position:absolute;width:22%;height:auto}
+.sp .fig{position:absolute;inset:22% 18%;border:2px solid currentColor;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff7;gap:2px}
+.sp .fig b{font-size:calc(var(--cw)*.5)}.sp .fig svg{width:44%;height:auto}
+.card.mel:not(.sel){box-shadow:0 3px 0 var(--gold),0 2px 6px #0006}
+@keyframes deal{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.card{animation:none}.meter i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><h1 id="ttl">Sala de cartas</h1><button class="ghost" id="back" hidden>← Menú</button></header>
+
+<section id="menu"><p class="desc">Elige a qué quieres jugar. Todos los juegos usan las reglas clásicas.</p><div class="menu" id="mgrid"></div></section>
+
+<section id="poker" hidden>
+ <div class="table">
+  <div class="seat"><div class="bar"><span class="av">R</span><span>Rival</span><span id="t1"></span><span class="stack"><span class="coin"></span><span id="c1"></span></span></div><div class="think" id="th"></div><div class="hand" id="h1"></div><div class="bet" id="b1"></div></div>
+  <div class="mid"><div class="stage" id="stage"></div><div class="hand" id="bd"></div><div class="pot"><span class="chip"></span>Bote <b id="pot"></b></div></div>
+  <div class="seat"><div class="bet" id="b0"></div><div class="hand" id="h0"></div><div class="bar"><span class="av">Tú</span><span id="t0"></span><span class="stack"><span class="coin"></span><span id="c0"></span></span></div></div>
+ </div>
+ <div class="hud"><div class="panel"><div id="hn">Tu mano</div><div class="meter"><i id="mt" style="width:0"></i></div><div id="eqt" style="color:var(--mute)"></div></div><div class="panel"><ol class="log" id="log"></ol></div></div>
+ <div class="msg" id="msg" aria-live="polite"></div>
+ <div class="ctl" id="ctl"></div>
+ <details><summary>Reglas</summary><p id="rules"></p></details>
+</section>
+
+<section id="bj" hidden>
+ <div class="table bjt">
+  <div class="seat"><div class="bar"><span class="av">C</span><span>Crupier</span><span class="stack" id="dt"></span></div><div class="hand" id="dh"></div></div>
+  <div class="bjrow" id="ph"></div>
+ </div>
+ <div class="hud"><div class="panel">Fichas <span class="stack" id="bc" style="color:var(--gold)"></span><br>Apuesta <span class="stack" id="bb" style="color:var(--gold)"></span></div><div class="panel"><ol class="log" id="blog"></ol></div></div>
+ <div class="msg" id="bmsg" aria-live="polite"></div>
+ <div class="ctl" id="bctl"></div>
+ <details><summary>Reglas</summary><p>Gana quien se acerque más a 21 sin pasarse. Las figuras valen 10 y el As 1 u 11. El crupier pide hasta 17 y se planta con 17 o más. El blackjack (As + 10 con dos cartas) paga 3:2. Puedes doblar con tus dos primeras cartas, dividir pares (hasta 4 manos; los ases dividen con una sola carta) y pedir seguro (paga 2:1) si el crupier muestra un As. Se juega con 4 barajas.</p></details>
+</section>
+
+<section id="cas" hidden>
+ <div class="table bjt">
+  <div class="seat"><div class="bar"><span id="ln1"></span><span class="stack" id="lt1"></span></div><div class="hand" id="ch1"></div></div>
+  <div class="hand" id="ch2" hidden></div><div class="seat"><div class="hand" id="ch0"></div><div class="bar"><span id="ln0"></span><span class="stack" id="lt0"></span></div></div>
+ </div>
+ <div class="hud"><div class="panel"><span id="k0">Fichas</span> <span class="stack" id="cc" style="color:var(--gold)"></span><br><span id="k1">Apuesta</span> <span class="stack" id="cb" style="color:var(--gold)"></span></div><div class="panel"><ol class="log" id="clog"></ol></div></div>
+ <div class="msg" id="cmsg" aria-live="polite"></div>
+ <div class="ctl" id="cctl"></div>
+ <details><summary>Reglas</summary><p id="crules"></p></details>
+</section>
+
+<section id="sol" hidden>
+ <div class="table kt"><div id="kb"></div></div>
+ <div class="msg" id="kmsg" aria-live="polite"></div>
+ <div class="ctl"><button id="knew">Nueva partida</button></div>
+ <details><summary>Reglas</summary><p>Mueve todas las cartas a las cuatro bases, de As a Rey y por palos. En las columnas se apila en orden descendente alternando colores (rojo sobre negro). Solo un Rey puede ocupar una columna vacía. Toca una carta y después su destino, o haz doble toque para enviarla a la base. Toca el mazo para robar una carta; cuando se acaba, tocarlo recicla el descarte.</p></details>
+</section>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const SU='♠♥♦♣',RL=r=>r<11?r:'JQKA'[r-11],clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+function mk(n=1){const d=[];for(let k=0;k<n;k++)for(let s=0;s<4;s++)for(let r=2;r<15;r++)d.push({r,s});return shuf(d)}
+function card(c,o={}){if(o.hide)return'<div class="card back"></div>';
+ const t=`${RL(c.r)}<br>${SU[c.s]}`;
+ return`<div class="card${c.s==1||c.s==2?' red':''}${o.sel?' sel':''}" data-i="${o.i}"><span>${t}</span><span class="br">${t}</span><em>${SU[c.s]}</em></div>`}
+
+/* ---------- Evaluador ---------- */
+const NM=['Carta alta','Pareja','Doble pareja','Trío','Escalera','Color','Full','Póker','Escalera de color'];
+const nm=s=>NM[s/15**5|0];
+function ev5(c){
+ const cnt={};c.forEach(x=>cnt[x.r]=(cnt[x.r]||0)+1);
+ const g=Object.entries(cnt).map(([r,n])=>[n,+r]).sort((a,b)=>b[0]-a[0]||b[1]-a[1]);
+ const fl=c.every(x=>x.s==c[0].s),rs=c.map(x=>x.r).sort((a,b)=>b-a);
+ let st=g.length==5&&rs[0]-rs[4]==4,hi=rs[0];
+ if(g.length==5&&rs[0]==14&&rs[1]==5){st=true;hi=5}
+ const cat=st&&fl?8:g[0][0]==4?7:g[0][0]==3&&g[1][0]==2?6:fl?5:st?4:g[0][0]==3?3:g[0][0]==2&&g[1][0]==2?2:g[0][0]==2?1:0;
+ return(st?[hi]:g.map(x=>x[1])).reduce((a,r,i)=>a+r*15**(4-i),cat*15**5)}
+function cmb(a,k,s=0,c=[],o=[]){if(c.length==k){o.push(c.slice());return o}for(let i=s;i<a.length;i++){c.push(a[i]);cmb(a,k,i+1,c,o);c.pop()}return o}
+function best(v,h,b){
+ if(v=='draw')return ev5(h);
+ let m=0;
+ if(v=='holdem')cmb(h.concat(b),5).forEach(x=>m=Math.max(m,ev5(x)));
+ else{const bs=cmb(b,3);cmb(h,2).forEach(a=>bs.forEach(c=>m=Math.max(m,ev5(a.concat(c)))))}
+ return m}
+function equity(v,h,b,n=90){
+ const rest=mk().filter(c=>![...h,...b].some(k=>k.r==c.r&&k.s==c.s));let w=0;
+ for(let i=0;i<n;i++){shuf(rest);const o=rest.slice(0,h.length),bd=v=='draw'?[]:b.concat(rest.slice(h.length,h.length+5-b.length));
+  const x=best(v,h,bd),y=best(v,o,bd);w+=x>y?1:x==y?.5:0}
+ return w/n}
+
+/* ---------- Menú ---------- */
+const G={
+ holdem:{n:'Texas Hold’em',tag:'El póker más famoso del mundo',ico:'♠',hole:2,blinds:true,
+  d:'Dos cartas privadas y cinco comunes. Ciegas 10/20, dealer rotativo y apuestas sin límite.',
+  r:'Cada jugador recibe 2 cartas. Las ciegas son 10 (pequeña, la pone el dealer) y 20 (grande). Hay 4 rondas de apuestas: preflop, flop (3 cartas comunes), turn (1) y river (1). Formas tu mejor mano de 5 cartas combinando las tuyas con las comunes. Apuestas sin límite: la subida mínima es igual a la última subida.'},
+ omaha:{n:'Omaha',tag:'Pot-limit',ico:'♥',hole:4,blinds:true,pl:true,
+  d:'Cuatro cartas privadas: debes usar exactamente 2 y 3 de la mesa. Apuestas pot-limit.',
+  r:'Igual que Hold’em, pero con 4 cartas privadas. Tu mano debe formarse con exactamente 2 de tus cartas y 3 de las comunes. Es pot-limit: la subida máxima es el tamaño del bote tras igualar.'},
+ draw:{n:'Póker cerrado',tag:'Draw de 5 cartas',ico:'♦',hole:5,
+  d:'El clásico: 5 cartas, cambio de cartas y apuesta final.',
+  r:'Cada jugador pone un ante de 10 y recibe 5 cartas ocultas. Hay una ronda de apuestas, luego puedes cambiar hasta 3 cartas (4 si tienes un As) y una segunda ronda de apuestas. Gana la mejor mano de 5.'},
+ bj:{n:'Blackjack',tag:'Veintiuna',ico:'♣',sec:'bj',d:'Llega a 21 sin pasarte. Doblar, dividir y seguro incluidos.'},
+ ba:{n:'Baccarat',tag:'Punto Banco',ico:'♦',sec:'cas',d:'Apuesta a Jugador, Banca o Empate. Gana la mano más cercana a 9.',
+  r:'Se reparten dos cartas a Jugador y Banca. Los ases valen 1, del 2 al 9 su valor y las figuras y el 10 valen 0; cuenta solo la última cifra del total. Con 8 o 9 (natural) nadie pide. El Jugador pide con 0 a 5 y se planta con 6 o 7. La Banca sigue la tabla oficial según su total y la tercera carta del Jugador. Pagos: Jugador 1:1, Banca 1:1 con 5% de comisión, Empate 8:1 (si apuestas a Jugador o Banca y hay empate, recuperas tu apuesta).'},
+ vp:{n:'Video póker',tag:'Jacks or Better',ico:'♠',sec:'cas',d:'Una mano, un cambio de cartas y una tabla de pagos. Sin rival.',
+  r:'Recibes 5 cartas, toca las que quieras mantener y cambia el resto una sola vez. Pagos por apuesta: pareja de J o mejor 1, doble pareja 2, trío 3, escalera 4, color 6, full 9, póker 25, escalera de color 50, escalera real 800.'},
+ sm:{n:'Siete y media',tag:'Baraja española',ico:'●',sec:'cas',d:'Acércate a 7½ sin pasarte con la baraja española de 40 cartas.',
+  r:'Del 1 al 7 las cartas valen su número; sota, caballo y rey valen medio punto. Pides cartas hasta plantarte o pasarte de 7½. Después la Banca roba hasta igualar o superar tu total; los empates los gana la Banca, así que solo ganas si se pasa. Ganar paga 1:1 y hacer 7½ con dos cartas (un 7 y una figura) paga 3:2.'},
+ br:{n:'Brisca',tag:'Baraja española',ico:'▲',sec:'cas',d:'Gana bazas con el triunfo y consigue más de 60 puntos.',
+  r:'Se juega 1 contra 1 con 3 cartas en mano. La carta que queda boca arriba marca el triunfo. En cada baza juega primero quien ganó la anterior y no es obligatorio seguir el palo: gana la carta de triunfo, o la más alta del palo de salida. Orden: As, 3, Rey, Caballo, Sota, 7, 6, 5, 4, 2. Puntos: As 11, 3 vale 10, Rey 4, Caballo 3, Sota 2. Tras cada baza roba primero el ganador. Hay 120 puntos en total: con más de 60 ganas.'},
+ es:{n:'Escoba',tag:'Baraja española',ico:'♣',sec:'cas',d:'Captura cartas de la mesa sumando 15. Hasta 15 puntos.',
+  r:'Valores: del 1 al 7 su número, sota 8, caballo 9 y rey 10. Elige una carta de tu mano y las de la mesa que sumen 15 con ella; si puedes capturar, debes hacerlo. Si no puedes, la carta se queda en la mesa. Limpiar la mesa es una escoba (1 punto, salvo en la última jugada). Al acabar la mano puntúan: más cartas, más oros, más sietes, el siete de oros y cada escoba. Gana quien llegue antes a 15 puntos.'},
+ ch:{n:'Chinchón',tag:'Baraja española',ico:'●',sec:'cas',d:'Forma tríos y escaleras con tus 7 cartas y cierra con pocos puntos sueltos.',
+  r:'Baraja de 40 cartas, 7 por jugador. En tu turno robas del mazo o del descarte y descartas una. Combinaciones: tríos o cuartetos del mismo número, o escaleras del mismo palo (tras el 7 va la sota). Sota, caballo y rey valen 10 y el resto su número. Puedes cerrar si tras descartar tus cartas sueltas suman 5 o menos; con 0 sueltas restas 10 puntos. El otro suma sus sueltas. Pierde quien llegue a 100. Las cartas con línea dorada forman combinación.'},
+ gi:{n:'Gin Rummy',tag:'Dos jugadores',ico:'♠',sec:'cas',d:'Combina tus 10 cartas y cierra (knock) con 10 puntos sueltos o menos.',
+  r:'Baraja francesa, 10 cartas. Robas del mazo o del descarte y descartas. Combinaciones: grupos de 3 o 4 del mismo valor o escaleras del mismo palo (el As es bajo). Figuras 10, As 1. Puedes cerrar con 10 o menos sueltos: ganas la diferencia de puntos. Si el rival tiene igual o menos, lo “superas” y él gana 25 más la diferencia. Gin (0 sueltos): 25 más los puntos del rival. Gana quien llegue a 100. En esta versión el rival no puede colocar cartas en tus combinaciones.'},
+ ru:{n:'Rummy',tag:'Dos jugadores',ico:'♥',sec:'cas',d:'Forma combinaciones con todas tus cartas y sal antes que el rival.',
+  r:'Baraja francesa, 10 cartas. Robas del mazo o del descarte y descartas. Combinaciones: grupos de 3 o 4 del mismo valor o escaleras del mismo palo (el As es bajo). Sales cuando, tras descartar, todas tus cartas forman combinaciones. Sumas los puntos sueltos del rival (figuras 10, As 1). Gana quien llegue a 100.'},
+ kl:{n:'Solitario Klondike',tag:'El solitario clásico',ico:'♥',sec:'sol',d:'El de toda la vida: ordena las cartas en las cuatro bases.',r:''}};
+const H={holdem:'Póker',bj:'Casino',br:'Baraja española',ch:'Combinaciones',kl:'Solitario'};
+$('#mgrid').innerHTML=Object.entries(G).map(([k,g])=>`${H[k]?`<h2 class="hd">${H[k]}</h2>`:''}<button class="mcard${k=='holdem'?' main':''}" data-k="${k}"><i>${g.ico}</i><small>${g.tag}</small><b>${g.n}</b><span>${g.d}</span></button>`).join('');
+$('#mgrid').onclick=e=>{const b=e.target.closest('.mcard');if(b)go(b.dataset.k)};
+$('#back').onclick=()=>go('menu');
+function go(k){
+ P.id++;B.id++;C.id++;
+ const sec=k=='menu'?'menu':G[k].sec||'poker';['menu','poker','bj','cas','sol'].forEach(s=>$('#'+s).hidden=s!=sec);
+ $('#back').hidden=k=='menu';$('#ttl').textContent=k=='menu'?'Sala de cartas':G[k].n;
+ if(k=='bj')startB();else if(k=='kl')startK();else if(k!='menu'&&G[k].sec=='cas')startC(k);else if(k!='menu')startP(k)}
+
+/* ---------- Póker ---------- */
+const P={id:0};
+const lg=t=>{P.log.push(t);P.log=P.log.slice(-8)};
+function startP(k){
+ const g=G[k];
+ Object.assign(P,{k,g,chips:[1000,1000],n:0,btn:Math.random()<.5?0:1,pot:0,board:[],hole:[[],[]],sel:null,show:false,bets:[0,0],log:['Partida nueva: 1000 fichas cada uno.'],stage:'',think:false,eq:null,hn:''});
+ $('#rules').textContent=g.r;rP();setMsg('Pulsa para repartir la primera mano.');
+ $('#ctl').innerHTML='<button id="go">Repartir</button>';$('#go').onclick=hand}
+const setMsg=t=>$('#msg').textContent=t;
+function rP(){
+ $('#h1').innerHTML=P.hole[1].map(c=>card(c,{hide:!P.show})).join('');
+ $('#h0').innerHTML=P.hole[0].map((c,i)=>card(c,{i,sel:P.sel&&P.sel.has(i)})).join('');
+ $('#bd').innerHTML=P.k=='draw'?'':[0,1,2,3,4].map(i=>P.board[i]?card(P.board[i]):'<div class="card slot"></div>').join('');
+ $('#c0').textContent=P.chips[0];$('#c1').textContent=P.chips[1];$('#pot').textContent=P.pot;
+ [0,1].forEach(i=>{$('#b'+i).innerHTML=P.bets[i]?`<span class="chip"></span>${P.bets[i]}`:'';
+  const d=P.n&&P.btn==i;$('#t'+i).innerHTML=!P.n?'':(d?'<span class="tag d">Dealer</span> ':'')+(P.g.blinds?`<span class="tag">${d?'Ciega pequeña':'Ciega grande'}</span>`:'')});
+ $('#stage').textContent=P.stage;$('#th').textContent=P.think?'El rival está pensando…':'';
+ $('#hn').innerHTML='Tu mano: <b>'+(P.hn||'—')+'</b>';
+ $('#mt').style.width=(P.eq==null?0:Math.round(P.eq*100))+'%';
+ $('#eqt').textContent=P.eq==null?'Probabilidad de ganar contra una mano al azar':`Probabilidad de ganar: ${Math.round(P.eq*100)}%`;
+ $('#log').innerHTML=P.log.map(x=>`<li>${x}</li>`).join('');$('#log').scrollTop=999}
+function myName(){
+ if(P.k=='draw')return nm(ev5(P.hole[0]));
+ if(P.board.length<3){const h=P.hole[0];return P.k=='holdem'?(h[0].r==h[1].r?'Pareja de '+RL(h[0].r):'Carta alta '+RL(Math.max(h[0].r,h[1].r))):'Preflop'}
+ return nm(best(P.k,P.hole[0],P.board))}
+$('#h0').onclick=e=>{const c=e.target.closest('.card');if(!P.sel||!c)return;const i=+c.dataset.i;
+ if(P.sel.has(i))P.sel.delete(i);else if(P.sel.size<P.max)P.sel.add(i);else setMsg(`Solo puedes cambiar ${P.max} cartas como máximo.`);
+ rP();P.upd()};
+
+function humanAct(c){return new Promise(res=>{
+ P.eq=equity(P.k,P.hole[0],P.board,150);P.hn=myName();P.think=false;rP();
+ let h='';
+ if(c.call>0)h+='<button class="ghost" id="bf">Retirarse</button>';
+ h+=`<button id="bk">${c.call>0?'Igualar '+c.call:'Pasar'}</button>`;
+ if(c.canRaise)h+=`<div class="rz"><div class="qs"><button class="ghost" data-q="0">Mínimo</button><button class="ghost" data-q=".5">½ bote</button><button class="ghost" data-q="1">Bote</button><button class="ghost" data-q="9">All-in</button></div><div class="rs"><input type="range" id="rs" aria-label="Cantidad" min="${c.minTo}" max="${c.maxTo}" step="5" value="${c.minTo}"><button id="br"></button></div></div>`;
+ $('#ctl').innerHTML=h;setMsg('Es tu turno.');
+ const done=a=>{$('#ctl').innerHTML='';res(a)};
+ if($('#bf'))$('#bf').onclick=()=>done({type:'fold'});
+ $('#bk').onclick=()=>done({type:'call'});
+ if($('#rs')){const s=$('#rs'),u=()=>{const x=+s.value;$('#br').textContent=x>=c.full?`All-in ${x}`:`${c.cur?'Subir a':'Apostar'} ${x}`};u();s.oninput=u;
+  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const q=+b.dataset.q;
+   s.value=q==9?c.maxTo:q==0?c.minTo:clamp(c.cur+Math.round(q*(P.pot+c.call)/5)*5,c.minTo,c.maxTo);u()});
+  $('#br').onclick=()=>done({type:'raise',to:+s.value})}})}
+
+async function cpuAct(c){
+ P.think=true;rP();await sleep(1000);
+ const eq=equity(P.k,P.hole[1],P.board)+(Math.random()-.5)*.14,odds=c.call/(P.pot+c.call);
+ if(c.call>0&&eq<odds&&Math.random()>.08)return{type:'fold'};
+ if(c.canRaise&&c.raises<4&&(eq>.66||(c.call==0&&eq<.33&&Math.random()<.1))){
+  const f=eq>.85?.9:eq>.75?.6:.4;return{type:'raise',to:clamp(c.cur+Math.round(f*(P.pot+c.call)/5)*5,c.minTo,c.maxTo)}}
+ return{type:'call'}}
+
+async function betRound(first){
+ const tok=P.id,b=P.bets,acted=[false,false];let t=first,minR=20,raises=0;
+ while(true){
+  const o=1-t,call=Math.min(b[o]-b[t],P.chips[t]);
+  if(P.chips[t]<=0||(b[t]>=b[o]&&P.chips[o]<=0))acted[t]=true;
+  else{
+   const cur=b[o],full=b[t]+P.chips[t],canRaise=P.chips[t]>call&&P.chips[o]>0;
+   const minTo=Math.min(cur+minR,full),maxTo=Math.max(minTo,Math.min(full,P.g.pl?cur+P.pot+call:full));
+   const cx={call,cur,canRaise,minTo,maxTo,full,raises};
+   const a=t==0?await humanAct(cx):await cpuAct(cx);
+   if(tok!==P.id)throw 0;
+   acted[t]=true;const who=t==0?'Tú':'El rival';
+   if(a.type=='fold'){lg(`${who} ${t==0?'te retiras':'se retira'}.`);return t}
+   const to=a.type=='raise'?a.to:b[t]+call,put=Math.min(to-b[t],P.chips[t]);
+   P.chips[t]-=put;b[t]+=put;P.pot+=put;
+   const ai=P.chips[t]<=0?' (all-in)':'';
+   if(a.type=='raise'&&b[t]>b[o]){minR=Math.max(minR,b[t]-b[o]);acted[o]=false;raises++;lg(`${who}: ${cur?'sube a':'apuesta'} ${b[t]}${ai}.`)}
+   else lg(`${who}: ${call>0?'iguala '+put:'pasa'}${ai}.`);
+  }
+  P.think=false;rP();
+  if(acted[0]&&acted[1]&&(b[0]==b[1]||P.chips[0]<=0||P.chips[1]<=0))break;
+  t=o}
+ const d=b[0]-b[1];
+ if(d>0&&P.chips[1]<=0){P.chips[0]+=d;P.pot-=d}else if(d<0&&P.chips[0]<=0){P.chips[1]-=d;P.pot+=d}
+ P.bets=[0,0];rP();return -1}
+
+function cpuDiscard(h,max){
+ if(ev5(h)>=4*15**5)return[];
+ const cnt={};h.forEach(c=>cnt[c.r]=(cnt[c.r]||0)+1);
+ let keep=h.filter(c=>cnt[c.r]>1);
+ for(let s=0;s<4;s++){const f=h.filter(c=>c.s==s);if(f.length>=4)keep=f}
+ if(!keep.length)keep=h.filter(c=>c.r>=13).slice(0,2);
+ return h.filter(c=>!keep.includes(c)).sort((a,b)=>a.r-b.r).slice(0,max)}
+
+async function discard(){
+ const tok=P.id;P.sel=new Set();P.max=P.hole[0].some(c=>c.r==14)?4:3;P.eq=null;P.hn=myName();rP();
+ await new Promise(res=>{P.upd=()=>{$('#ctl').innerHTML=`<button id="dc">${P.sel.size?'Cambiar '+P.sel.size+(P.sel.size==1?' carta':' cartas'):'Mantener todas'}</button>`;$('#dc').onclick=res};
+  setMsg(`Toca las cartas que quieras cambiar (máximo ${P.max}).`);P.upd()});
+ if(tok!==P.id)throw 0;
+ const n=P.sel.size;[...P.sel].forEach(i=>P.hole[0][i]=P.deck.shift());P.sel=null;$('#ctl').innerHTML='';
+ const mx=P.hole[1].some(c=>c.r==14)?4:3,ds=cpuDiscard(P.hole[1],mx);
+ P.hole[1]=P.hole[1].map(c=>ds.includes(c)?P.deck.shift():c);
+ lg(`Tú cambias ${n}. El rival cambia ${ds.length}.`);P.hn=myName();rP();await sleep(900)}
+
+function post(i,a,bet){a=Math.min(a,P.chips[i]);P.chips[i]-=a;P.pot+=a;if(bet)P.bets[i]+=a}
+async function hand(){
+ const tok=P.id,g=P.g;
+ try{
+  P.n++;P.btn=1-P.btn;P.show=false;P.sel=null;P.deck=mk();P.pot=0;P.board=[];P.bets=[0,0];P.eq=null;P.hn='';
+  const dl=P.btn,ot=1-dl;
+  if(g.blinds){post(dl,10,1);post(ot,20,1)}else{post(0,10);post(1,10)}
+  lg(`Mano ${P.n}: ${dl==0?'tú eres':'el rival es'} el dealer.`);
+  P.hole=[0,1].map(()=>P.deck.splice(0,g.hole));P.hn=myName();
+  const steps=P.k=='draw'?['Primera apuesta','Cambio de cartas','Apuesta final']:['Preflop','Flop','Turn','River'];
+  let f=-1;$('#ctl').innerHTML='';
+  for(let k=0;k<steps.length&&f<0;k++){
+   P.stage=steps[k];
+   if(P.k!='draw'&&k>0){P.board.push(...P.deck.splice(0,k==1?3:1));lg(`— ${steps[k]} —`)}
+   P.eq=null;P.hn=myName();rP();
+   if(P.k=='draw'&&k==1){await discard();continue}
+   await sleep(450);
+   f=await betRound(g.blinds&&k==0?dl:ot);
+  }
+  finish(f)
+ }catch(e){if(e!==0)throw e}}
+
+function finish(f){
+ let m;P.stage='';P.eq=null;
+ if(f>=0){const w=1-f;P.chips[w]+=P.pot;m=w==0?`El rival se retira. Ganas ${P.pot} fichas.`:`Te retiras. El rival gana ${P.pot} fichas.`}
+ else{P.show=true;const a=best(P.k,P.hole[0],P.board),c=best(P.k,P.hole[1],P.board);
+  const txt=`Tú: ${nm(a)}. Rival: ${nm(c)}. `;
+  if(a>c){P.chips[0]+=P.pot;m=txt+`Ganas ${P.pot} fichas.`}
+  else if(c>a){P.chips[1]+=P.pot;m=txt+`El rival gana ${P.pot} fichas.`}
+  else{const h=Math.floor(P.pot/2);P.chips[0]+=h;P.chips[1]+=P.pot-h;m=txt+'Empate: se reparte el bote.'}}
+ P.pot=0;P.sel=null;P.hn=myName();lg(m);rP();
+ const over=P.chips[0]<=0||P.chips[1]<=0;
+ setMsg(m+(over?(P.chips[0]<=0?' Te has quedado sin fichas.':' ¡Has ganado la partida!'):''));
+ $('#ctl').innerHTML=`<button id="nx">${over?'Nueva partida':'Siguiente mano'}</button>`;
+ $('#nx').onclick=over?()=>startP(P.k):hand}
+
+/* ---------- Blackjack ---------- */
+const B={chips:1000,bet:0,last:50,shoe:[],hs:[],d:[],cur:0,ph:'bet',ins:0,id:0,log:[]};
+const val=c=>c.r==14?11:c.r>10?10:c.r;
+function hv(h){let t=0,a=0;h.forEach(c=>{t+=val(c);if(c.r==14)a++});while(t>21&&a>0){t-=10;a--}return{t,soft:a>0}}
+const nat=h=>h.c.length==2&&!h.sp&&hv(h.c).t==21;
+const draw=()=>{if(B.shoe.length<20)B.shoe=mk(4);return B.shoe.pop()};
+const bmsg=t=>{$('#bmsg').textContent=t;B.log.push(t);B.log=B.log.slice(-8)};
+function startB(){Object.assign(B,{bet:0,hs:[],d:[],ph:'bet',ins:0,log:[]});if(B.chips<=0)B.chips=1000;B.bet=Math.min(B.last,B.chips);bmsg('Haz tu apuesta.');rB()}
+function rB(){
+ const hide=B.ph=='ins'||B.ph=='play',dv=hv(B.d);
+ $('#dh').innerHTML=B.d.map((c,i)=>card(c,{hide:hide&&i==1})).join('');
+ $('#dt').textContent=B.d.length?(hide?val(B.d[0]):(dv.soft&&dv.t<=21?'Suave ':'')+dv.t):'';
+ $('#ph').innerHTML=B.hs.map((h,i)=>{const v=hv(h.c);return`<div class="hg${B.ph=='play'&&i==B.cur?' act':''}"><div class="hand">${h.c.map(c=>card(c)).join('')}</div><div class="lab">${v.soft&&v.t<=21?'Suave ':''}${v.t}${v.t>21?' (pasado)':''} · apuesta ${h.bet}${h.res?`<b>${h.res}</b>`:''}</div></div>`}).join('');
+ $('#bc').textContent=B.chips;$('#bb').textContent=B.ph=='bet'?B.bet:B.hs.reduce((a,h)=>a+h.bet,0)+B.ins;
+ $('#blog').innerHTML=B.log.map(x=>`<li>${x}</li>`).join('');$('#blog').scrollTop=999;
+ const h=B.hs[B.cur];let c='';
+ if(B.ph=='bet')c=B.chips<=0?'<button id="rs2">Nueva partida</button>':'<span class="chips ctl">'+[10,50,100].map(x=>`<button data-x="${x}" ${B.bet+x>B.chips?'disabled':''}>+${x}</button>`).join('')+'</span><button class="ghost" id="clr">Borrar</button><button id="dl" '+(B.bet?'':'disabled')+'>Repartir</button>';
+ else if(B.ph=='ins')c=`<button id="yi" ${B.chips<Math.floor(B.hs[0].bet/2)?'disabled':''}>Seguro (${Math.floor(B.hs[0].bet/2)})</button><button class="ghost" id="ni">Sin seguro</button>`;
+ else if(B.ph=='play'){const two=h.c.length==2;
+  c=`<button id="hit">Pedir</button><button class="ghost" id="std">Plantarse</button>${two&&B.chips>=h.bet?'<button class="ghost" id="dbl">Doblar</button>':''}${two&&val(h.c[0])==val(h.c[1])&&B.chips>=h.bet&&B.hs.length<4?'<button class="ghost" id="spl">Dividir</button>':''}`}
+ else if(B.ph=='done')c='<button id="nr">Nueva ronda</button>';
+ $('#bctl').innerHTML=c;
+ const q=s=>$(s),on=(s,f)=>{if(q(s))q(s).onclick=f};
+ document.querySelectorAll('.chips button').forEach(b=>b.onclick=()=>{B.bet+=+b.dataset.x;rB()});
+ on('#clr',()=>{B.bet=0;rB()});on('#dl',deal);on('#hit',hit);on('#std',stand);on('#dbl',dbl);on('#spl',split);
+ on('#yi',()=>{B.ins=Math.floor(B.hs[0].bet/2);B.chips-=B.ins;bmsg(`Pides seguro por ${B.ins}.`);peek()});
+ on('#ni',peek);
+ on('#rs2',()=>{B.chips=1000;startB()});
+ on('#nr',()=>{B.hs=[];B.d=[];B.ph='bet';B.bet=Math.min(B.last,B.chips);bmsg('Haz tu apuesta.');rB()})}
+function deal(){
+ B.chips-=B.bet;B.last=B.bet;B.hs=[{c:[draw(),draw()],bet:B.bet}];B.d=[draw(),draw()];B.cur=0;B.ins=0;
+ if(B.d[0].r==14){B.ph='ins';bmsg('El crupier muestra un As. ¿Quieres seguro?');rB()}else peek()}
+function peek(){
+ const dbj=val(B.d[0])>=10&&hv(B.d).t==21;
+ if(dbj||nat(B.hs[0])){B.ph='done';return settle()}
+ if(B.ins)bmsg('El crupier no tiene blackjack: pierdes el seguro.');
+ B.ph='play';bmsg('Tu turno: pedir, plantarte, doblar o dividir.');rB()}
+function next(){
+ while(B.cur<B.hs.length&&B.hs[B.cur].done)B.cur++;
+ if(B.cur>=B.hs.length)dealer();else rB()}
+function hit(){const h=B.hs[B.cur];h.c.push(draw());const t=hv(h.c).t;if(t>=21)h.done=true;next()}
+function stand(){B.hs[B.cur].done=true;next()}
+function dbl(){const h=B.hs[B.cur];B.chips-=h.bet;h.bet*=2;h.c.push(draw());h.done=true;next()}
+function split(){
+ const h=B.hs[B.cur],ace=h.c[0].r==14;B.chips-=h.bet;
+ const n={c:[h.c.pop()],bet:h.bet,sp:true};h.sp=true;h.c.push(draw());n.c.push(draw());
+ B.hs.splice(B.cur+1,0,n);
+ [h,n].forEach(x=>{if(ace||hv(x.c).t==21)x.done=true});
+ bmsg('Divides la pareja.');next()}
+async function dealer(){
+ B.ph='dealer';rB();$('#bctl').innerHTML='';
+ if(B.hs.some(h=>hv(h.c).t<=21)){
+  while(hv(B.d).t<17){await sleep(700);B.d.push(draw());rB()}
+  await sleep(300)}
+ B.ph='done';settle()}
+function settle(){
+ const d=hv(B.d).t,dbj=B.d.length==2&&d==21;let net=0,parts=[];
+ if(B.ins){if(dbj){B.chips+=B.ins*3;net+=B.ins*2}else net-=B.ins}
+ B.hs.forEach((h,i)=>{
+  const p=hv(h.c).t;let pay=0,r;
+  if(p>21)r='Te pasas';
+  else if(nat(h)&&!dbj){pay=h.bet*2.5;r='Blackjack 3:2'}
+  else if(dbj&&!nat(h))r='Blackjack del crupier';
+  else if(d>21||p>d){pay=h.bet*2;r=d>21?'El crupier se pasa':'Ganas'}
+  else if(p==d){pay=h.bet;r='Empate'}
+  else r='Pierdes';
+  B.chips+=pay;net+=pay-h.bet;h.res=r;parts.push((B.hs.length>1?`Mano ${i+1}: `:'')+r)});
+ bmsg(parts.join('. ')+`. Resultado: ${net>0?'+':''}${net} fichas.`+(B.chips<=0?' Te has quedado sin fichas.':''));
+ B.ph='done';rB()}
+
+/* ---------- Baccarat, Video póker y Siete y media ---------- */
+const C={id:0,log:[]};
+const cm=t=>{$('#cmsg').textContent=t;C.log.push(t);C.log=C.log.slice(-8)};
+const bv=c=>c.r>=14?1:c.r>=10?0:c.r,bt=h=>h.reduce((a,c)=>a+bv(c),0)%10;
+const smv=c=>c.n>=10?.5:c.n,smt=h=>h.reduce((a,c)=>a+smv(c),0);
+function sc0(c,i,sel){const g='●♥▲♣'[c.s];return`<div class="card${sel?' sel':''}" data-i="${i}" style="color:${['#b8860b','#b3261e','#1f4e8c','#2e7d32'][c.s]}"><span>${c.n>=10?'SCR'[c.n-10]:c.n}<br>${g}</span><em>${g}</em></div>`}
+function vpPay(h){const s=ev5(h),cat=s/15**5|0,k=(s-cat*15**5)/15**4|0;
+ if(cat==8)return k==14?['Escalera real',800]:['Escalera de color',50];
+ return cat==7?['Póker',25]:cat==6?['Full',9]:cat==5?['Color',6]:cat==4?['Escalera',4]:cat==3?['Trío',3]:cat==2?['Doble pareja',2]:cat==1&&k>=11?['Pareja de '+RL(k),1]:[nm(s),0]}
+function startC(k){
+ if(k=='ch'||k=='gi'||k=='ru')return startR(k);if(k=='br'||k=='es')return startG(k);Object.assign(C,{k,chips:1000,bet:0,last:50,ph:'bet',a:[],b:[],side:'p',log:[],hold:null});
+ C.bet=50;$('#crules').textContent=G[k].r;cm('Haz tu apuesta.');rC()}
+function rC(){
+ const k=C.k,f=k=='sm'?sc:card;
+ $('#ch1').innerHTML=C.b.map(c=>f(c)).join('');
+ $('#ch0').innerHTML=C.a.map((c,i)=>k=='vp'?card(c,{i,sel:C.hold&&C.hold.has(i)}):f(c)).join('');
+ $('#ch1').parentNode.hidden=k=='vp';
+ const n={ba:['Banca','Jugador'],vp:['','Tu mano'],sm:['Banca','Tú']}[k];
+ $('#ln1').textContent=n[0];$('#ln0').textContent=n[1];
+ const tt=h=>!h.length?'':k=='ba'?bt(h):k=='sm'?smt(h):'';
+ $('#lt1').textContent=tt(C.b);$('#lt0').textContent=k=='vp'?(C.a.length?vpPay(C.a)[0]:''):tt(C.a);
+ $('#k0').textContent='Fichas';$('#k1').textContent='Apuesta';$('#ch2').hidden=true;$('#cc').textContent=C.chips;$('#cb').textContent=C.bet+(k=='ba'&&C.ph=='bet'?' a '+{p:'Jugador',b:'Banca',t:'Empate'}[C.side]:'');
+ $('#clog').innerHTML=C.log.map(x=>`<li>${x}</li>`).join('');$('#clog').scrollTop=999;
+ let c='';
+ if(C.ph=='bet'){
+  if(C.chips<=0)c='<button data-a="new">Nueva partida</button>';
+  else{if(k=='ba')c+=[['p','Jugador'],['b','Banca'],['t','Empate']].map(([s,t])=>`<button class="${C.side==s?'':'ghost'}" data-s="${s}">${t}</button>`).join('');
+   c+='<span class="chips ctl">'+[10,50,100].map(x=>`<button data-x="${x}" ${C.bet+x>C.chips?'disabled':''}>+${x}</button>`).join('')+'</span><button class="ghost" data-a="clr">Borrar</button><button data-a="deal" '+(C.bet?'':'disabled')+'>Repartir</button>'}}
+ else if(C.ph=='play'&&k=='sm')c='<button data-a="hit">Pedir carta</button><button class="ghost" data-a="std">Plantarse</button>';
+ else if(C.ph=='hold')c=`<button data-a="draw">${C.hold.size==5?'Mantener todas':'Cambiar '+(5-C.hold.size)}</button>`;
+ else if(C.ph=='done')c=C.chips<=0?'<button data-a="new">Nueva partida</button>':'<button data-a="nr">Nueva ronda</button>';
+ $('#cctl').innerHTML=c}
+$('#cctl').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const d=b.dataset;
+ if(d.x){C.bet+=+d.x;rC()}else if(d.s){C.side=d.s;rC()}
+ else if(d.a=='clr'){C.bet=0;rC()}
+ else if(d.a=='deal')({ba:dealBa,vp:dealVp,sm:dealSm})[C.k]()
+ else if(d.a=='draw')drawVp();else if(d.a=='hit')hitSm();else if(d.a=='std')stdSm();
+ else if(d.a=='nr'){C.a=[];C.b=[];C.ph='bet';C.hold=null;C.bet=Math.min(C.last,C.chips);cm('Haz tu apuesta.');rC()}
+ else if(d.a=='new')startC(C.k)};
+$('#ch0').onclick=e=>{const c=e.target.closest('.card');if(C.ph!='hold'||!c)return;const i=+c.dataset.i;C.hold.has(i)?C.hold.delete(i):C.hold.add(i);rC()};
+function endC(t,pay){const n=pay-C.bet;C.chips+=pay;C.ph='done';
+ cm(`${t} ${n>0?'Ganas '+n:n<0?'Pierdes '+(-n):'Recuperas tu apuesta'}.`+(C.chips<=0?' Te has quedado sin fichas.':''));rC()}
+function begin(){C.chips-=C.bet;C.last=C.bet;C.a=[];C.b=[];C.ph='play';rC()}
+async function dealBa(){
+ const id=C.id;begin();const dk=mk(),d=()=>dk.pop();
+ for(const h of [C.a,C.b,C.a,C.b]){h.push(d());rC();await sleep(450);if(id!==C.id)return}
+ if(bt(C.a)<8&&bt(C.b)<8){let p3=null;
+  if(bt(C.a)<=5){const c=d();C.a.push(c);p3=bv(c);rC();await sleep(650);if(id!==C.id)return}
+  const x=bt(C.b),dr=p3===null?x<=5:x<=2||(x==3?p3!=8:x==4?p3>=2&&p3<=7:x==5?p3>=4&&p3<=7:x==6&&p3>=6&&p3<=7);
+  if(dr){C.b.push(d());rC();await sleep(650);if(id!==C.id)return}}
+ const p=bt(C.a),b=bt(C.b),w=p>b?'p':b>p?'b':'t';let pay=0;
+ if(C.side==w)pay=w=='p'?C.bet*2:w=='b'?C.bet*2-Math.ceil(C.bet*.05):C.bet*9;else if(w=='t')pay=C.bet;
+ endC(`Jugador ${p}, Banca ${b}. ${{p:'Gana el Jugador',b:'Gana la Banca',t:'Empate'}[w]}.`,pay)}
+function dealVp(){begin();C.dk=mk();C.a=C.dk.splice(0,5);C.hold=new Set();C.ph='hold';cm('Toca las cartas que quieras mantener.');rC()}
+function drawVp(){C.a=C.a.map((c,i)=>C.hold.has(i)?c:C.dk.pop());const[n,m]=vpPay(C.a);C.hold=null;
+ endC(n+'.',C.bet*m)}
+function dealSm(){begin();const d=[];for(let s=0;s<4;s++)for(const n of [1,2,3,4,5,6,7,10,11,12])d.push({n,s});C.dk=shuf(d);C.a=[C.dk.pop()];cm('Pide carta o plántate. Llega a 7½ sin pasarte.');rC()}
+function hitSm(){C.a.push(C.dk.pop());const t=smt(C.a);if(t>7.5){rC();endC(`Te pasas con ${t}.`,0)}else if(t==7.5)stdSm();else rC()}
+async function stdSm(){
+ const id=C.id,p=smt(C.a);C.ph='bank';rC();
+ while(smt(C.b)<p){await sleep(650);if(id!==C.id)return;C.b.push(C.dk.pop());rC()}
+ const b=smt(C.b);
+ if(b>7.5)endC(`La banca se pasa con ${b}.`,C.a.length==2&&p==7.5?C.bet*2.5:C.bet*2);
+ else endC(`La banca gana con ${b} contra ${p}.`,0)}
+
+/* ---------- Brisca y Escoba ---------- */
+const SD=()=>{const d=[];for(let s=0;s<4;s++)for(const n of [1,2,3,4,5,6,7,10,11,12])d.push({n,s});return shuf(d)};
+const SN=['Oros','Copas','Espadas','Bastos'],BP={1:11,3:10,12:4,11:3,10:2},BS=[2,4,5,6,7,10,11,12,3,1];
+const bp=c=>BP[c.n]||0,bs=c=>BS.indexOf(c.n),ev=c=>c.n>=10?c.n-2:c.n,say=t=>$('#cmsg').textContent=t;
+function startG(k){
+ Object.assign(C,{k,ph:'g',log:[],pick:null});C.id++;$('#crules').textContent=G[k].r;
+ if(k=='br'){const d=SD();C.g={d,tr:d[0],h:[d.splice(-3),d.splice(-3)],pl:[null,null],w:[0,0],lead:0,over:false};
+  cm(`El triunfo es ${SN[d[0].s]}. Empiezas tú.`);rG();brLoop()}
+ else{C.g={tot:[0,0],mano:1,over:false};esRound()}}
+function rG(){
+ const g=C.g,br=C.k=='br';
+ $('#ch2').hidden=false;$('#ch1').parentNode.hidden=false;$('#k0').textContent='Tú';$('#k1').textContent='Rival';
+ $('#ch1').innerHTML=g.h[1].map(()=>card(0,{hide:1})).join('');
+ $('#ch0').innerHTML=g.h[0].map((c,i)=>sc(c,i,!br&&g.sH===i)).join('');
+ $('#ln1').textContent='Rival';$('#ln0').textContent='Tú';
+ if(br){$('#ch2').innerHTML=(g.d.length?sc(g.tr)+`<span class="tag">Triunfo: ${SN[g.tr.s]}, quedan ${g.d.length}</span>`:`<span class="tag">Triunfo: ${SN[g.tr.s]}</span>`)+g.pl.map(c=>c?sc(c):'').join('');
+  $('#lt1').textContent=$('#cb').textContent=g.w[1]+' pts';$('#lt0').textContent=$('#cc').textContent=g.w[0]+' pts'}
+ else{$('#ch2').innerHTML=g.tb.map((c,i)=>sc(c,i,g.sT&&g.sT.has(i))).join('');
+  const t=p=>`${g.cap[p].length} cartas, ${g.es[p]} escobas`;$('#lt1').textContent=t(1);$('#lt0').textContent=t(0);
+  $('#cc').textContent=g.tot[0]+' pts';$('#cb').textContent=g.tot[1]+' pts'}
+ $('#clog').innerHTML=C.log.map(x=>`<li>${x}</li>`).join('');$('#clog').scrollTop=999;
+ let c='';
+ if(g.over)c='<button data-g="new">Nueva partida</button>';
+ else if(g.next)c='<button data-g="next">Siguiente mano</button>';
+ else if(!br&&C.pick&&g.t==0)c=g.sH==null?'<button disabled>Elige una carta</button>':`<button data-g="play">Jugar (suma ${ev(g.h[0][g.sH])+[...g.sT].reduce((a,i)=>a+ev(g.tb[i]),0)})</button>`;
+ $('#cctl').innerHTML=c}
+$('#ch0').addEventListener('click',e=>{const c=e.target.closest('.card'),g=C.g;if(!c||C.ph!='g'||!C.pick)return;const i=+c.dataset.i;
+ if(C.k=='br'){const f=C.pick;C.pick=null;f(i)}else{g.sH=g.sH===i?null:i;rG()}});
+$('#ch2').addEventListener('click',e=>{const c=e.target.closest('.card'),g=C.g;if(!c||C.k!='es'||!C.pick)return;const i=+c.dataset.i;g.sT.has(i)?g.sT.delete(i):g.sT.add(i);rG()});
+$('#cctl').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;const a=b.dataset.g;
+ if(a=='new')startG(C.k);else if(a=='next')esRound();else if(a=='play')esBtn()});
+
+function brCpu(g,a){
+ const h=g.h[1],tr=g.tr.s,cost=c=>bp(c)*10+(c.s==tr?100:0)+bs(c),srt=l=>l.sort((x,y)=>cost(x)-cost(y));
+ if(a){const w=h.filter(c=>(c.s==a.s&&bs(c)>bs(a))||(c.s==tr&&a.s!=tr));if(w.length&&(bp(a)>=3||w.some(c=>c.s!=tr)))return h.indexOf(srt(w)[0])}
+ return h.indexOf(srt(h.slice())[0])}
+async function brLoop(){
+ const g=C.g,id=C.id;
+ while(true){
+  const f=g.lead;
+  for(const p of [f,1-f]){let i;
+   if(p==0){say('Tu turno: toca una carta.');rG();i=await new Promise(r=>C.pick=r);if(id!==C.id)return}
+   else{say('El rival piensa…');await sleep(900);if(id!==C.id)return;i=brCpu(g,p==f?null:g.pl[f])}
+   g.pl[p]=g.h[p].splice(i,1)[0];rG();await sleep(500);if(id!==C.id)return}
+  const a=g.pl[f],b=g.pl[1-f],tr=g.tr.s,w=(b.s==a.s&&bs(b)>bs(a))||(b.s==tr&&a.s!=tr)?1-f:f,pt=bp(a)+bp(b);
+  g.w[w]+=pt;cm(`${w?'El rival gana':'Ganas'} la baza (+${pt}).`);rG();await sleep(1100);if(id!==C.id)return;
+  g.pl=[null,null];
+  if(g.d.length){g.h[w].push(g.d.pop());g.h[1-w].push(g.d.pop())}
+  g.lead=w;rG();
+  if(!g.h[0].length&&!g.h[1].length)break}
+ const[x,y]=g.w;g.over=true;cm(x>y?`¡Ganas ${x} a ${y}!`:x<y?`El rival gana ${y} a ${x}.`:'Empate a 60.');rG()}
+
+function sums(tb,need){const o=[];for(let m=1;m<1<<tb.length;m++){let s=0;const ix=[];for(let i=0;i<tb.length;i++)if(m>>i&1){s+=ev(tb[i]);ix.push(i)}if(s==need)o.push(ix)}return o}
+function esRound(){
+ const g=C.g,d=SD();g.d=d;g.tb=d.splice(-4);g.h=[d.splice(-3),d.splice(-3)];g.cap=[[],[]];g.es=[0,0];g.last=-1;
+ g.mano=1-g.mano;g.t=g.mano;g.next=false;g.sH=null;g.sT=new Set();
+ cm(`Nueva mano. ${g.mano?'Empieza el rival':'Empiezas tú'}.`);rG();esLoop()}
+function esBtn(){
+ const g=C.g,c=g.h[0][g.sH];if(!c||!C.pick)return;const ix=[...g.sT],need=15-ev(c);
+ if(ix.length){if(ix.reduce((a,i)=>a+ev(g.tb[i]),0)!=need)return cm('Las cartas elegidas no suman 15.')}
+ else if(sums(g.tb,need).length)return cm('Debes capturar si puedes.');
+ const f=C.pick;C.pick=null;f([g.sH,ix])}
+function esCpu(g){
+ let best=-1e9,ch=null;
+ g.h[1].forEach((c,hi)=>sums(g.tb,15-ev(c)).forEach(ix=>{const cs=ix.map(i=>g.tb[i]).concat(c);
+  const s=cs.length*2+cs.filter(x=>x.s==0).length*2+cs.filter(x=>x.n==7).length*4+(cs.some(x=>x.n==7&&x.s==0)?10:0)+(ix.length==g.tb.length?15:0);
+  if(s>best){best=s;ch=[hi,ix]}}));
+ if(ch)return ch;
+ const w=c=>(c.s==0?3:0)+(c.n==7?6:0)+(c.n==7&&c.s==0?10:0)+(c.n==1?1:0);
+ let m=0;g.h[1].forEach((c,i)=>{if(w(c)<w(g.h[1][m]))m=i});return[m,[]]}
+function esPlay(g,p,hi,ix){
+ const c=g.h[p].splice(hi,1)[0],who=p?'El rival':'Tú';
+ if(ix.length){const cs=ix.map(i=>g.tb[i]);g.tb=g.tb.filter((_,i)=>!ix.includes(i));g.cap[p].push(c,...cs);g.last=p;
+  const lp=!g.d.length&&!g.h[0].length&&!g.h[1].length;
+  if(!g.tb.length&&!lp){g.es[p]++;cm(`${who}: ¡escoba!`)}else cm(`${who} captura ${cs.length+1} cartas.`)}
+ else{g.tb.push(c);cm(`${who} deja una carta en la mesa.`)}}
+async function esLoop(){
+ const g=C.g,id=C.id;
+ while(true){
+  if(!g.h[0].length&&!g.h[1].length){if(!g.d.length)break;g.h=[g.d.splice(-3),g.d.splice(-3)];g.t=g.mano}
+  const p=g.t;let hi,ix;
+  if(p==0){g.sH=null;g.sT=new Set();say('Tu turno: elige una carta tuya y las de la mesa que sumen 15 con ella.');rG();[hi,ix]=await new Promise(r=>C.pick=r);if(id!==C.id)return}
+  else{say('El rival piensa…');rG();await sleep(1000);if(id!==C.id)return;[hi,ix]=esCpu(g)}
+  esPlay(g,p,hi,ix);g.sH=null;g.sT=new Set();rG();await sleep(600);if(id!==C.id)return;g.t=1-p}
+ if(g.last>=0)g.cap[g.last].push(...g.tb);g.tb=[];
+ const n=(p,f)=>g.cap[p].filter(f).length,pt=[0,0];
+ [()=>1,c=>c.s==0,c=>c.n==7,c=>c.n==7&&c.s==0].forEach(f=>{const a=n(0,f),b=n(1,f);if(a>b)pt[0]++;else if(b>a)pt[1]++});
+ pt[0]+=g.es[0];pt[1]+=g.es[1];g.tot[0]+=pt[0];g.tot[1]+=pt[1];
+ cm(`Fin de la mano: tú +${pt[0]}, rival +${pt[1]}.`);
+ if(Math.max(...g.tot)>=15&&g.tot[0]!=g.tot[1]){g.over=true;cm(g.tot[0]>g.tot[1]?'¡Has ganado la partida!':'El rival gana la partida.')}else g.next=true;
+ rG()}
+
+/* ---------- Solitario Klondike ---------- */
+let K={};
+const kv=c=>c.r==14?1:c.r,kr=c=>c.s==1||c.s==2;
+const kp=p=>p=='w'?K.waste:p[0]=='t'?K.tab[+p[1]]:K.found[+p[1]];
+function kTab(c,pl){const t=pl[pl.length-1];return t?t.up&&kr(t)!=kr(c)&&kv(t)==kv(c)+1:kv(c)==13}
+const kFnd=(c,n)=>c.s==n&&kv(c)==K.found[n].length+1;
+function kMove(sp,i,dp){
+ if(sp==dp)return false;
+ const src=kp(sp),cs=src.slice(i),dst=kp(dp);
+ if(!cs.length||!(dp[0]=='t'?kTab(cs[0],dst):cs.length==1&&kFnd(cs[0],+dp[1])))return false;
+ src.splice(i);dst.push(...cs);
+ if(sp[0]=='t'&&src.length)src[src.length-1].up=true;
+ K.mv++;return true}
+function startK(){
+ const d=mk();
+ K={tab:[0,1,2,3,4,5,6].map(i=>d.splice(-(i+1)).map((c,j)=>({...c,up:j==i}))),stock:d.map(c=>({...c,up:false})),waste:[],found:[[],[],[],[]],sel:null,mv:0};
+ rK()}
+function rK(){
+ const sl=g=>`<div class="card slot"><em>${g||''}</em></div>`;
+ const pile=(pl,p)=>{let y=0,last=0;
+  const h=pl.map((c,i)=>{const t=y;last=c.up?.28:.12;y+=last;const sel=K.sel&&K.sel.p==p&&i>=K.sel.i;
+   return`<div class="kw" style="top:calc(var(--ch)*${t})" data-p="${p}" data-i="${i}">${c.up?card(c,{i,sel}):card(0,{hide:1})}</div>`}).join('');
+  return`<div class="col" data-p="${p}" style="height:calc(var(--ch)*${y-last+1})">${h}</div>`};
+ const top=K.waste[K.waste.length-1],on=p=>K.sel&&K.sel.p==p;
+ $('#kb').innerHTML=`<div class="ktop"><div class="cell" data-p="s">${K.stock.length?card(0,{hide:1}):sl('↻')}</div><div class="cell" data-p="w">${top?card(top,{i:0,sel:on('w')}):sl()}</div><span></span>${K.found.map((f,n)=>`<div class="cell" data-p="f${n}">${f.length?card(f[f.length-1],{i:0,sel:on('f'+n)}):sl(SU[n])}</div>`).join('')}</div><div class="kcols">${K.tab.map((t,n)=>pile(t,'t'+n)).join('')}</div>`;
+ $('#kmsg').textContent=K.found.every(f=>f.length==13)?`¡Has ganado en ${K.mv} movimientos!`:`Movimientos: ${K.mv}`}
+$('#knew').onclick=startK;
+$('#kb').onclick=e=>{
+ const el=e.target.closest('[data-p]');if(!el||!K.tab)return;
+ const p=el.dataset.p,i=el.dataset.i==null?null:+el.dataset.i;
+ if(p=='s'){if(K.stock.length){const c=K.stock.pop();c.up=true;K.waste.push(c)}else{K.stock=K.waste.reverse().map(c=>({...c,up:false}));K.waste=[]}K.sel=null;return rK()}
+ const pl=kp(p),s=K.sel;K.sel=null;
+ if(s&&s.p==p&&(i===null||s.i===i))return rK();
+ if(s&&p[0]!='w'&&kMove(s.p,s.i,p))return rK();
+ if(p=='w'||p[0]=='f'){if(pl.length)K.sel={p,i:pl.length-1}}
+ else if(i!==null&&pl[i].up)K.sel={p,i};
+ rK()};
+
+/* ---------- Diseño de la baraja española ---------- */
+const SS=['<circle cx="12" cy="12" r="10.5" fill="#e6b93d" stroke="#8a5a00" stroke-width="1.4"/><circle cx="12" cy="12" r="6.5" fill="none" stroke="#8a5a00" stroke-width="1.2"/><circle cx="12" cy="12" r="2.2" fill="#8a5a00"/>',
+'<path d="M4 3h16c0 8-3.5 10-8 10S4 11 4 3zM11 13h2v5h-2zM7 22h10l-2.5-4h-5z" fill="#c0392b" stroke="#6e1b14" stroke-width="1"/>',
+'<path d="M12 1l3 5v10H9V6zM5 16h14v2.2H5zM11 18h2v5h-2z" fill="#2b5ea8" stroke="#16335f" stroke-width=".8"/>',
+'<path d="M17 2c3 1 4.5 4 2 6.5L8.5 22c-2 1.5-4.5-1-3-3L15 3.5c.5-1 1.2-1.6 2-1.5z" fill="#3b8f3b" stroke="#1d4d1d" stroke-width="1"/><circle cx="15" cy="8" r="1.5" fill="#1d4d1d"/><circle cx="11" cy="14" r="1.5" fill="#1d4d1d"/>'];
+const PX={2:[[1,0],[1,3]],3:[[1,0],[1,1.5],[1,3]],4:[[0,0],[2,0],[0,3],[2,3]],5:[[0,0],[2,0],[1,1.5],[0,3],[2,3]],6:[[0,0],[2,0],[0,1.5],[2,1.5],[0,3],[2,3]],7:[[0,0],[2,0],[1,.75],[0,1.5],[2,1.5],[0,3],[2,3]]};
+const sv=(s,st='',cl='')=>`<svg viewBox="0 0 24 24" class="${cl}" style="${st}">${SS[s]}</svg>`;
+function sc(c,i,sel,m){
+ const L=c.n>7?'SCR'[c.n-10]:c.n,col=['#8a5a00','#b3261e','#1f4e8c','#2e7d32'][c.s];
+ const mid=c.n>7?`<div class="fig" style="color:${col}"><b>${L}</b>${sv(c.s)}</div>`:c.n==1?sv(c.s,'left:24%;top:30%;width:52%','pp'):PX[c.n].map(([x,y])=>sv(c.s,`left:${28+x*20}%;top:${18+y*19}%`,'pp')).join('');
+ const cn=k=>`<div class="cn ${k}">${L}${sv(c.s,'','cs')}</div>`;
+ return`<div class="card sp${sel?' sel':''}${m?' mel':''}" data-i="${i}">${cn('')}${cn('br')}${mid}</div>`}
+
+/* ---------- Chinchón, Gin Rummy y Rummy ---------- */
+const SQ=[1,2,3,4,5,6,7,10,11,12],RC={ch:{sp:1,N:7,thr:5},gi:{sp:0,N:10,thr:10},ru:{sp:0,N:10,thr:0}};
+const W=(c,sp)=>sp?{o:SQ.indexOf(c.n),s:c.s,p:c.n>7?10:c.n}:{o:c.r==14?1:c.r,s:c.s,p:c.r==14?1:c.r>10?10:c.r};
+function mld(h){
+ const n=h.length,M=[],tot=h.reduce((a,x)=>a+x.p,0),pm=m=>h.reduce((a,x,i)=>a+(m>>i&1?x.p:0),0);
+ for(let m=7;m<1<<n;m++){const ix=h.filter((_,i)=>m>>i&1);if(ix.length<3)continue;
+  if(ix.every(x=>x.o==ix[0].o)&&new Set(ix.map(x=>x.s)).size==ix.length)M.push(m);
+  else if(ix.every(x=>x.s==ix[0].s)){const o=ix.map(x=>x.o).sort((a,b)=>a-b);if(o.every((x,j)=>!j||x==o[j-1]+1))M.push(m)}}
+ const memo=new Map(),f=u=>{if(memo.has(u))return memo.get(u);let b=[0,0];
+  for(const m of M)if(!(m&u)){const r=f(u|m),v=r[0]+pm(m);if(v>b[0])b=[v,r[1]|m]}memo.set(u,b);return b};
+ const b=f(0);return{d:tot-b[0],m:b[1]}}
+const nmC=(c,g)=>g.sp?`${c.n>7?['Sota','Caballo','Rey'][c.n-10]:c.n} de ${SN[c.s]}`:`${RL(c.r)}${SU[c.s]}`;
+const sortH=(g,p)=>g.h[p].sort((a,b)=>a.s-b.s||W(a,g.sp).o-W(b,g.sp).o);
+function startR(k){
+ Object.assign(C,{k,ph:'g',log:[],pick:null});C.id++;
+ C.g={rm:1,...RC[k],tot:[0,0],first:1,over:false};$('#crules').textContent=G[k].r;rRound()}
+function rRound(){
+ const g=C.g,d=g.sp?SD():mk();g.d=d;g.h=[d.splice(-g.N),d.splice(-g.N)];g.dis=[d.pop()];
+ g.first=1-g.first;g.t=g.first;g.show=false;g.next=false;g.sel=null;sortH(g,0);sortH(g,1);cm('Nueva mano.');rTurn()}
+function rTurn(){const g=C.g;g.ph='draw';g.sel=null;say(g.t?'Turno del rival…':'Tu turno: roba del mazo o del descarte.');rR();if(g.t)cpuR()}
+function rDraw(p,src){
+ const g=C.g;if(!g.d.length){const t=g.dis.pop();g.d=shuf(g.dis);g.dis=[t]}
+ g.h[p].push(src=='d'?g.dis.pop():g.d.pop());sortH(g,p)}
+async function cpuR(){
+ const g=C.g,id=C.id,N=g.N,dwv=h=>mld(h.map(c=>W(c,g.sp))).d;
+ await sleep(1000);if(id!==C.id)return;
+ const bestD=h=>{let b=null;h.forEach((c,i)=>{const r=h.slice();r.splice(i,1);const d=dwv(r),p=W(c,g.sp).p;if(!b||d<b.d||(d==b.d&&p>b.p))b={i,d,p}});return b};
+ const top=g.dis[g.dis.length-1],wt=bestD(g.h[1].concat(top)),tk=wt.i<N&&wt.d<dwv(g.h[1]);
+ rDraw(1,tk?'d':'s');cm(`El rival roba ${tk?'del descarte ('+nmC(top,g)+')':'del mazo'}.`);
+ const bd=bestD(g.h[1]),c=g.h[1].splice(bd.i,1)[0];g.dis.push(c);cm(`El rival descarta ${nmC(c,g)}.`);
+ if(bd.d<=g.thr){rEnd(1);return}
+ g.t=0;rTurn()}
+function rEnd(p){
+ const g=C.g,A=mld(g.h[p].map(c=>W(c,g.sp))),Bw=mld(g.h[1-p].map(c=>W(c,g.sp))),pt=[0,0];
+ if(g.k=='ch'){if(!A.d)pt[p]-=10;pt[1-p]+=Bw.d}
+ else if(g.k=='gi'){if(!A.d)pt[p]+=25+Bw.d;else if(Bw.d>A.d)pt[p]+=Bw.d-A.d;else pt[1-p]+=25+A.d-Bw.d}
+ else pt[p]+=Bw.d;
+ g.tot[0]+=pt[0];g.tot[1]+=pt[1];g.show=true;g.ph='end';
+ cm(`${p?'El rival cierra':'Cierras'} con ${A.d} sueltos y el otro tiene ${Bw.d}. Puntos: tú ${pt[0]}, rival ${pt[1]}.`);
+ const[a,b]=g.tot;
+ if(a>=100||b>=100){g.over=true;cm((g.k=='ch'?a<b:a>b)?'¡Has ganado la partida!':'El rival gana la partida.')}else g.next=true;
+ rR()}
+function rR(){
+ const g=C.g,f=g.sp?sc:(c,i,s,m)=>card(c,{i,sel:s}).replace('class="card','class="card'+(m?' mel':''));
+ const me=mld(g.h[0].map(c=>W(c,g.sp))),top=g.dis[g.dis.length-1];
+ $('#ch2').hidden=false;$('#ch1').parentNode.hidden=false;$('#k0').textContent='Tú';$('#k1').textContent='Rival';
+ $('#ch1').innerHTML=g.h[1].map((c,i)=>g.show?f(c,i):card(0,{hide:1})).join('');
+ $('#ch0').innerHTML=g.h[0].map((c,i)=>f(c,i,g.sel===i,me.m>>i&1)).join('');
+ $('#ch2').innerHTML=`<div class="cell" data-r="s">${card(0,{hide:1})}</div><div class="cell" data-r="d">${top?f(top,0):''}</div>`;
+ $('#ln1').textContent=`Rival (mazo: ${g.d.length})`;$('#ln0').textContent='Tú';
+ $('#lt1').textContent='';$('#lt0').textContent=`Sueltos: ${me.d}`;
+ $('#cc').textContent=g.tot[0]+' pts';$('#cb').textContent=g.tot[1]+' pts';
+ $('#clog').innerHTML=C.log.map(x=>`<li>${x}</li>`).join('');$('#clog').scrollTop=999;
+ let c='';
+ if(g.over)c='<button data-r="new">Nueva partida</button>';
+ else if(g.next)c='<button data-r="next">Siguiente mano</button>';
+ else if(!g.t&&g.ph=='disc'){
+  if(g.sel==null)c='<button disabled>Elige la carta a descartar</button>';
+  else{const ok=mld(g.h[0].filter((_,i)=>i!=g.sel).map(x=>W(x,g.sp))).d<=g.thr;
+   c=`<button data-r="disc">Descartar</button>${ok?`<button class="ghost" data-r="close">${{ch:'Cerrar',gi:'Cerrar (knock)',ru:'Salir'}[C.k]}</button>`:''}`}}
+ $('#cctl').innerHTML=c}
+$('#ch2').addEventListener('click',e=>{const g=C.g,el=e.target.closest('[data-r]');if(!g||!g.rm||g.t||g.ph!='draw'||!el)return;
+ rDraw(0,el.dataset.r);g.ph='disc';say('Elige una carta para descartar.');rR()});
+$('#ch0').addEventListener('click',e=>{const g=C.g,c=e.target.closest('.card');if(!g||!g.rm||g.t||g.ph!='disc'||!c)return;
+ g.sel=g.sel===+c.dataset.i?null:+c.dataset.i;rR()});
+$('#cctl').addEventListener('click',e=>{const g=C.g,b=e.target.closest('[data-r]');if(!g||!g.rm||!b)return;const a=b.dataset.r;
+ if(a=='new')startR(C.k);else if(a=='next')rRound();
+ else if((a=='disc'||a=='close')&&g.sel!=null){const c=g.h[0].splice(g.sel,1)[0];g.dis.push(c);cm(`Descartas ${nmC(c,g)}.`);if(a=='close')rEnd(0);else{g.t=1;rTurn()}}});
+$('#kb').ondblclick=e=>{
+ const el=e.target.closest('[data-p]');if(!el||!K.tab)return;
+ const p=el.dataset.p;if(p=='s'||p[0]=='f')return;
+ const pl=kp(p),i=pl.length-1,c=pl[i];
+ if(p[0]=='t'&&+el.dataset.i!=i)return;
+ if(c&&c.up&&kMove(p,i,'f'+c.s)){K.sel=null;rK()}};
+</script>
+</body>
+</html>
