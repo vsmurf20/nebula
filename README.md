@@ -17,7 +17,7 @@ El catálogo se alimenta desde `games.js`. Cada juego tiene un `id`, `title`, `d
 
 Para publicar un juego nuevo en uno de los espacios 05–12:
 
-1. Abre `games.js` y localiza el objeto del espacio, por ejemplo `juego-05`.
+1. Abre `games.js` y localiza el objeto del espacio, por ejemplo `juego-06` o cualquier espacio libre.
 2. Copia el archivo HTML del juego dentro de `games/juego-05/` y llámalo exactamente `index.html`.
 3. Cambia el título, descripción, género, icono, portada, versión, explicación, controles, fecha y novedades.
 4. Comprueba que `path` sea `games/juego-05/index.html`.
@@ -60,3 +60,8 @@ GitHub Pages sirve archivos estáticos y no procesa formularios por sí solo. NE
 6. Revisa el panel de Formspree para comprobar que ha llegado. Configura allí el correo de notificaciones y revisa su filtro antispam.
 
 El plan gratuito de Formspree indica un límite de 50 envíos al mes y 30 días de historial; los límites pueden cambiar, así que comprueba la página oficial antes de usarlo: https://formspree.io/plans/ . La web no contiene contraseñas ni claves secretas; el identificador del endpoint es visible en el frontend por diseño. Si no se configura el endpoint, la web avisará y solo guardará el envío localmente en ese navegador.
+
+
+## Juegos integrados
+- `Party Island`: registrado como disponible en `games.js`, con ruta `games/party-island/index.html`.
+- Icono de pestaña (favicon): `assets/nebula-icon.svg`, compartido por todas las páginas principales.

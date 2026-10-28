@@ -18,3 +18,20 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}body{background:var(--bg);co
 @media(max-width:800px){.site-header{flex-wrap:wrap;gap:12px}.site-nav{order:3;width:100%;overflow-x:auto;flex-wrap:nowrap}.site-nav a{white-space:nowrap}.cards,.game-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.page-wrap{padding-top:38px}.detail-panel{grid-template-columns:minmax(0,.8fr) 1.2fr;gap:22px;padding:18px}}
 @media(max-width:560px){.site-header{padding:12px 5vw}.brand{font-size:17px}.nav-cta{font-size:12px;padding:9px 11px}.page-wrap{width:90vw;padding-top:32px}.page-title{font-size:clamp(31px,9vw,42px)}.page-lead{font-size:14px}.home-simple{padding-top:38px}.home-actions{margin:20px 0 38px}.home-actions .btn{flex:1}.section-heading{align-items:flex-start;flex-direction:column}.home-heading h2{font-size:24px}.cards,.game-grid{grid-template-columns:1fr}.cover,.game-icon-link{height:190px;min-height:190px}.card-content p{min-height:0}.toolbar{align-items:stretch;flex-direction:column}.searchbox{max-width:none;min-width:0}.filters{display:flex;overflow-x:auto;padding-bottom:3px}.filter{white-space:nowrap}.stat-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.detail-panel{grid-template-columns:1fr;padding:14px;gap:18px}.detail-cover{min-height:220px}.detail-copy .page-title{font-size:35px}.detail-actions .btn{flex:1}.panel{padding:18px}.site-footer{padding:20px 5vw}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+
+/* NEBULA polish: catalogue artwork icons */
+.game-icon-link{isolation:isolate;border-bottom:1px solid #ffffff12;background-image:radial-gradient(ellipse at 50% 115%,#83c5be35,transparent 58%),linear-gradient(145deg,#202b35,#151b23 72%);}
+.game-icon-link:before{content:"";position:absolute;width:190px;height:190px;border-radius:50%;border:1px solid #ffffff18;background:radial-gradient(circle at 35% 28%,#ffffff12,transparent 62%);box-shadow:0 0 0 18px #ffffff03,0 0 0 38px #ffffff02;transition:transform .35s,border-color .35s;pointer-events:none;}
+.game-icon-link:after{content:"✦";position:absolute;right:22%;top:28%;font-size:17px;color:#d8f5f1aa;text-shadow:0 0 18px #83c5be80;pointer-events:none;}
+.game-icon-link .cover-art{position:relative;z-index:1;display:grid;place-items:center;width:104px;height:104px;border-radius:28px;border:1px solid #ffffff30;background:linear-gradient(145deg,#ffffff20,#ffffff06);box-shadow:0 18px 40px #0005,inset 0 1px #ffffff20;font-size:58px;filter:none;backdrop-filter:blur(8px);}
+.game-icon-link:hover:before,.game-icon-link:focus-visible:before{transform:scale(1.08) rotate(8deg);border-color:#83c5be70;}
+.game-icon-link:hover .cover-art,.game-icon-link:focus-visible .cover-art{transform:translateY(-4px) scale(1.06) rotate(-4deg);box-shadow:0 22px 46px #0007,inset 0 1px #ffffff25;}
+.game-icon-link .cover-tag{z-index:2;letter-spacing:.04em;text-transform:uppercase;backdrop-filter:blur(10px);}
+.game-icon-link .icon-hint{z-index:3;}
+.cover.has-cover .cover-tag{background:#101419dc;border:1px solid #ffffff2b;}
+.game-card{transition:transform .22s ease,border-color .22s ease,background .22s ease;}
+.game-card:hover{transform:translateY(-4px);}
+.status{white-space:nowrap;}
+@media(max-width:600px){.game-icon-link .cover-art{width:88px;height:88px;border-radius:24px;font-size:49px}.game-icon-link:before{width:155px;height:155px}.game-icon-link:after{right:20%;top:25%}}
+@media(prefers-reduced-motion:reduce){.game-card,.game-icon-link:before,.game-icon-link .cover-art{transition:none!important}.game-card:hover{transform:none}}

@@ -11,3 +11,30 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}body{background:var(--bg);co
 @media(max-width:800px){.site-header{flex-wrap:wrap;gap:12px}.site-nav{order:3;width:100%;overflow-x:auto;flex-wrap:nowrap}.site-nav a{white-space:nowrap}.cards,.game-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.page-wrap{padding-top:38px}.detail-panel{grid-template-columns:minmax(0,.8fr) 1.2fr;gap:22px;padding:18px}}
 @media(max-width:560px){.site-header{padding:12px 5vw}.brand{font-size:17px}.nav-cta{font-size:12px;padding:9px 11px}.page-wrap{width:90vw;padding-top:32px}.page-title{font-size:clamp(31px,9vw,42px)}.page-lead{font-size:14px}.home-simple{padding-top:38px}.home-actions{margin:20px 0 38px}.home-actions .btn{flex:1}.section-heading{align-items:flex-start;flex-direction:column}.home-heading h2{font-size:24px}.cards,.game-grid{grid-template-columns:1fr}.cover,.game-icon-link{height:190px;min-height:190px}.card-content p{min-height:0}.toolbar{align-items:stretch;flex-direction:column}.searchbox{max-width:none;min-width:0}.filters{display:flex;overflow-x:auto;padding-bottom:3px}.filter{white-space:nowrap}.stat-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.detail-panel{grid-template-columns:1fr;padding:14px;gap:18px}.detail-cover{min-height:220px}.detail-copy .page-title{font-size:35px}.detail-actions .btn{flex:1}.panel{padding:18px}.site-footer{padding:20px 5vw}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+
+/* NEBULA polish: game emblem on detail pages */
+.detail-cover{isolation:isolate;background-image:radial-gradient(circle at 50% 42%,#ffffff14,transparent 48%),linear-gradient(145deg,#263740,#141b22)!important;border:1px solid #ffffff1c;box-shadow:inset 0 1px #ffffff10,0 18px 45px #0003;}
+.detail-cover:before{width:min(72%,300px);height:auto;aspect-ratio:1;border-color:#ffffff22;background:radial-gradient(circle at 35% 25%,#ffffff0c,transparent 65%);box-shadow:0 0 0 16px #ffffff03,0 0 70px #83c5be18;}
+.detail-cover:after{width:min(92%,360px);height:130px;border-color:#83c5be40;}
+.detail-cover span#detail-icon{display:grid;place-items:center;width:clamp(112px,15vw,166px);height:clamp(112px,15vw,166px);border-radius:36px;border:1px solid #ffffff32;background:linear-gradient(145deg,#ffffff20,#ffffff06);box-shadow:0 24px 55px #0006,inset 0 1px #ffffff25;font-size:clamp(66px,8vw,100px);backdrop-filter:blur(8px);}
+.detail-cover:hover span#detail-icon{transform:translateY(-3px) scale(1.035) rotate(-2deg);}
+.detail-cover-label{padding:8px 11px;border:1px solid #ffffff20;background:#101419c9;backdrop-filter:blur(10px);border-radius:8px;}
+.detail-meta span{background:#ffffff06;}
+.detail-note{color:var(--muted);}
+@media(max-width:650px){.detail-cover span#detail-icon{width:112px;height:112px;border-radius:27px;font-size:72px}}
+@media(prefers-reduced-motion:reduce){.detail-cover span#detail-icon{transition:none!important}}
+
+
+/* Corrección de ficha: el tamaño del icono no debe afectar a la etiqueta inferior. */
+.detail-cover .detail-cover-label{
+  display:inline-flex!important;align-items:center;max-width:calc(100% - 24px);
+  width:max-content!important;height:auto!important;min-height:0!important;
+  padding:6px 9px!important;border:1px solid #ffffff20!important;border-radius:6px!important;
+  background:#101419d9!important;color:#d5e0e3!important;
+  font-size:10px!important;line-height:1.3!important;letter-spacing:.14em!important;
+  white-space:normal;overflow-wrap:anywhere;box-shadow:none!important;
+  filter:none!important;backdrop-filter:blur(8px);
+}
+.detail-cover span#detail-icon{position:relative;z-index:1}
+@media(max-width:560px){.detail-cover .detail-cover-label{font-size:9px!important;letter-spacing:.1em!important}}
