@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ruleta Europea</title>
+<style>
+:root{--bg:#0a2a1d;--bg2:#14503a;--panel:rgba(0,0,0,.34);--felt:#0d5a3a;--text:#f4efe0;--muted:#a9c2b5;--gold:#e6c36a;--gold-d:#8e7330;--red:#c4282d;--black:#15171a;--green:#0c8a4a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#06180f;--bg2:#0f3a2a;--felt:#0a4a30}}
+:root[data-theme="dark"]{--bg:#06180f;--bg2:#0f3a2a;--felt:#0a4a30}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 50% 0,var(--bg2),var(--bg) 70%);background-attachment:fixed;color:var(--text);font-family:Georgia,"Times New Roman",serif;min-height:100%}
+.app{max-width:1200px;margin:0 auto;padding:14px}
+h1{font-size:26px;letter-spacing:.04em;color:var(--gold);margin-bottom:10px;font-weight:700}
+.hud{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:10px;margin-bottom:14px}
+.stat,.panel{background:var(--panel);border:1px solid var(--gold-d);border-radius:14px}
+.stat{padding:8px 14px}
+.stat small{display:block;font:600 12px system-ui,sans-serif;color:var(--muted)}
+.stat b{font:700 24px/1.25 system-ui,sans-serif;color:var(--gold);font-variant-numeric:tabular-nums}
+.pos{color:#6be39a!important}.neg{color:#ff8b8b!important}
+.main{display:grid;grid-template-columns:minmax(280px,470px) minmax(0,1fr);gap:14px;align-items:start}
+.panel{padding:14px}
+canvas{display:block;width:100%;aspect-ratio:1;max-width:460px;margin:0 auto}
+.res{display:flex;align-items:center;gap:14px;margin-top:10px}
+.ball{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font:700 30px system-ui,sans-serif;color:#fff;border:3px solid var(--gold);background:#333;flex:none}
+#msg{font-size:18px;line-height:1.3}
+.hist{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;min-height:28px}
+.hist span,.dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:700 13px system-ui,sans-serif;color:#fff;border:1.5px solid rgba(255,255,255,.7)}
+.red{background:var(--red)}.black{background:var(--black)}.green{background:var(--green)}
+.boardwrap{overflow-x:auto;padding:6px 2px 12px}
+.board{display:grid;grid-template-columns:1.2fr repeat(12,1fr) 1.1fr;grid-template-rows:repeat(3,58px) 46px 46px;gap:3px;min-width:720px;background:var(--felt);padding:10px;border:3px solid var(--gold);border-radius:12px;box-shadow:inset 0 0 40px rgba(0,0,0,.45)}
+.cell{position:relative;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.75);border-radius:6px;color:#fff;font:700 18px system-ui,sans-serif;cursor:pointer;user-select:none;text-align:center;transition:filter .15s,box-shadow .15s}
+.cell.out{background:rgba(0,0,0,.2);font-size:14px}
+.cell:hover{filter:brightness(1.35);box-shadow:0 0 0 2px var(--gold)}
+.cell.win{animation:win .7s ease-in-out infinite alternate;z-index:2}
+@keyframes win{to{box-shadow:0 0 0 3px var(--gold),0 0 22px 4px var(--gold);filter:brightness(1.5)}}
+.chip{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--c);color:var(--t,#fff);font:700 16px system-ui,sans-serif;border:5px dashed rgba(255,255,255,.92);box-shadow:inset 0 0 0 3px rgba(0,0,0,.28),0 3px 7px rgba(0,0,0,.55);cursor:pointer;transition:transform .15s}
+.tray{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:6px 0 14px}
+.tray .chip.sel{transform:translateY(-8px) scale(1.12);box-shadow:inset 0 0 0 3px rgba(0,0,0,.28),0 0 0 3px var(--gold),0 10px 14px rgba(0,0,0,.6)}
+.stack{position:absolute;left:50%;top:50%;width:30px;height:30px;transform:translate(-50%,-50%);pointer-events:none;z-index:1}
+.stack .chip{position:absolute;left:0;width:30px;height:30px;font-size:0;border-width:3px;cursor:default}
+.stack .tag{position:absolute;left:50%;bottom:-14px;transform:translateX(-50%);background:rgba(0,0,0,.85);color:var(--gold);font:700 11px system-ui,sans-serif;padding:1px 6px;border-radius:9px;white-space:nowrap}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.btn{font:700 15px system-ui,sans-serif;padding:11px 18px;border-radius:10px;border:1px solid var(--gold-d);background:rgba(0,0,0,.35);color:var(--text);cursor:pointer}
+.btn:hover:not(:disabled){background:rgba(230,195,106,.2)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.go{background:linear-gradient(#f1d27c,#b78d2c);color:#2a1c00;border-color:#f1d27c;font-size:18px;padding:11px 34px}
+.btn.go:hover:not(:disabled){background:linear-gradient(#ffe29a,#c99b35)}
+.hint{font:13px system-ui,sans-serif;color:var(--muted);text-align:center;margin-top:12px}
+@media (max-width:860px){.main{grid-template-columns:1fr}.hud{grid-template-columns:1fr 1fr}.hud .btn{grid-column:1/-1}}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.top h1{margin:0}
+.menu{display:flex;flex-wrap:wrap;gap:8px}
+.menu .btn{padding:8px 14px;font-size:14px}
+.btn[aria-pressed="true"]{background:rgba(230,195,106,.22);border-color:var(--gold)}
+.btn kbd{font:600 11px system-ui,sans-serif;opacity:.7;margin-left:6px;border:1px solid currentColor;border-radius:4px;padding:0 4px}
+.stats{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;padding-top:10px;border-top:1px solid var(--gold-d);font:14px system-ui,sans-serif}
+.stats span{display:flex;align-items:center;gap:6px}
+.stats .dot{width:14px;height:14px;border-width:1px}
+.stats small{color:var(--muted)}
+dialog{max-width:520px;width:calc(100% - 32px);background:#0e3526;color:var(--text);border:2px solid var(--gold);border-radius:16px;padding:22px;font-family:Georgia,serif;line-height:1.5}
+dialog::backdrop{background:rgba(0,0,0,.7)}
+dialog h2{color:var(--gold);margin-bottom:10px}
+dialog ul{padding-left:20px;margin-bottom:14px}
+dialog li{margin-bottom:4px}
+.btn:focus-visible,.chip:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <h1>Ruleta Europea</h1>
+    <div class="menu">
+      <button class="btn" id="snd" aria-pressed="true">Sonido: sí</button>
+      <button class="btn" id="fast" aria-pressed="false">Giro rápido: no</button>
+      <button class="btn" id="rules">Reglas</button>
+    </div>
+  </div>
+  <dialog id="dlg">
+    <h2>Reglas y pagos</h2>
+    <ul>
+      <li>Ruleta europea: 37 casillas, del 0 al 36.</li>
+      <li>Pleno (un número): paga 35 a 1.</li>
+      <li>Docena o columna: paga 2 a 1.</li>
+      <li>Rojo/negro, par/impar, 1-18 o 19-36: paga 1 a 1.</li>
+      <li>Si sale el 0, solo ganan los plenos al 0.</li>
+    </ul>
+    <p style="margin-bottom:10px"><b>Atajos:</b> Espacio gira, Z deshace, C quita todo, R repite, D dobla, teclas 1 a 6 eligen ficha.</p>
+    <form method="dialog"><button class="btn go" style="font-size:15px;padding:9px 24px">Entendido</button></form>
+  </dialog>
+  <div class="hud">
+    <div class="stat"><small>Saldo</small><b id="bal">0</b></div>
+    <div class="stat"><small>Apuesta total</small><b id="tot">0</b></div>
+    <div class="stat"><small>Último resultado</small><b id="lw">—</b></div>
+    <div class="stat"><small>Tirada</small><b id="rnd">0</b></div>
+    <button class="btn" id="reset" title="Reiniciar saldo a 1000">Reiniciar</button>
+  </div>
+  <div class="main">
+    <div class="panel">
+      <canvas id="wheel"></canvas>
+      <div class="res"><div class="ball" id="res">?</div><div id="msg">Haz tus apuestas.</div></div>
+      <div class="hist" id="hist"></div>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="panel">
+      <div class="tray" id="tray"></div>
+      <div class="boardwrap"><div class="board" id="board"></div></div>
+      <div class="ctrl" style="margin-top:6px">
+        <button class="btn" id="undo">Deshacer</button>
+        <button class="btn" id="clear">Quitar todo</button>
+        <button class="btn" id="rebet">Repetir</button>
+        <button class="btn" id="dbl">Doblar</button>
+        <button class="btn go" id="spin">¡Girar!</button>
+      </div>
+      <p class="hint">Elige una ficha y pulsa sobre el tablero. Clic derecho quita una ficha de esa casilla. Pleno paga 35 a 1, docenas y columnas 2 a 1, apuestas simples 1 a 1.</p>
+    </div>
+  </div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const ORDER=[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+const REDS=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+const colorOf=n=>n===0?"green":REDS.has(n)?"red":"black";
+const HEX={green:"#0c8a4a",red:"#c4282d",black:"#15171a"};
+const DEN=[1,5,10,25,100,500];
+const COL={1:"#e9e6dc",5:"#d33a3a",10:"#2f6fe0",25:"#2fa84f",100:"#1d1d1d",500:"#8a3fc7"};
+const STEP=Math.PI*2/37;
+
+let FAST=false,SOUND=true,allS=[],actx,balance=1000,bets={},undo=[],last=null,round=0,chip=5,spinning=false,settling=false,hist=[];
+try{const b=+localStorage.getItem("ruleta_saldo");if(b>0)balance=b}catch(e){}
+
+/* ---------- Reglas ---------- */
+function mult(k,n){
+  if(k[0]==="n")return +k.slice(1)===n?35:0;
+  if(n===0)return 0;
+  switch(k){
+    case "d1":return n<=12?2:0; case "d2":return n>12&&n<=24?2:0; case "d3":return n>24?2:0;
+    case "c1":return n%3===1?2:0; case "c2":return n%3===2?2:0; case "c3":return n%3===0?2:0;
+    case "low":return n<=18?1:0; case "high":return n>=19?1:0;
+    case "even":return n%2===0?1:0; case "odd":return n%2===1?1:0;
+    case "red":return REDS.has(n)?1:0; case "black":return REDS.has(n)?0:1;
+  }return 0;
+}
+const total=()=>Object.values(bets).reduce((a,b)=>a+b,0);
+const fmt=n=>n.toLocaleString("es-ES");
+
+/* ---------- Tablero ---------- */
+const board=$("#board");
+function cell(key,label,cls,style){
+  const d=document.createElement("div");
+  d.className="cell "+cls;d.dataset.key=key;d.innerHTML=label;d.style.cssText=style;board.appendChild(d);
+}
+cell("n0","0","green","grid-row:1/4;grid-column:1;font-size:26px");
+for(let r=0;r<3;r++)for(let c=0;c<12;c++){
+  const n=c*3+(3-r);cell("n"+n,n,colorOf(n),`grid-row:${r+1};grid-column:${c+2}`);
+}
+[["c3",1],["c2",2],["c1",3]].forEach(([k,r])=>cell(k,"2:1","out",`grid-row:${r};grid-column:14`));
+["1ª docena","2ª docena","3ª docena"].forEach((t,i)=>cell("d"+(i+1),t,"out",`grid-row:4;grid-column:${2+i*4}/span 4`));
+[["low","1-18","out"],["even","Par","out"],["red","Rojo","red"],["black","Negro","black"],["odd","Impar","out"],["high","19-36","out"]]
+  .forEach(([k,t,c],i)=>cell(k,t,c==="out"?"out":c+" out",`grid-row:5;grid-column:${2+i*2}/span 2`));
+
+/* ---------- Fichas ---------- */
+const chipEl=(v,extra="")=>`<div class="chip ${extra}" data-v="${v}" style="--c:${COL[v]};${v===1?"--t:#222":""}">${v}</div>`;
+$("#tray").innerHTML=DEN.map(v=>chipEl(v,v===chip?"sel":"")).join("");
+$("#tray").onclick=e=>{
+  const c=e.target.closest(".chip");if(!c)return;
+  chip=+c.dataset.v;document.querySelectorAll("#tray .chip").forEach(x=>x.classList.toggle("sel",x===c));
+};
+// Descompone un importe en fichas (mayores abajo), máximo 5 visibles
+function breakdown(a){
+  const out=[];for(const d of [...DEN].reverse())while(a>=d){out.push(d);a-=d}
+  return out.slice(0,5);
+}
+
+/* ---------- Apuestas ---------- */
+function place(k,a){
+  if(spinning||settling)return;
+  if(a>balance){msg("Saldo insuficiente para esa ficha.");return}
+  bets[k]=(bets[k]||0)+a;balance-=a;undo.push([k,a]);beep(520+Math.min(a,500)/2);sync();
+}
+function takeOne(k){
+  if(spinning||settling||!bets[k])return;
+  const a=Math.min(chip,bets[k]);bets[k]-=a;balance+=a;if(!bets[k])delete bets[k];undo.push([k,-a]);sync();
+}
+board.onclick=e=>{const c=e.target.closest(".cell");if(c)place(c.dataset.key,chip)};
+board.oncontextmenu=e=>{e.preventDefault();const c=e.target.closest(".cell");if(c)takeOne(c.dataset.key)};
+$("#undo").onclick=()=>{
+  if(spinning||settling||!undo.length)return;
+  const [k,a]=undo.pop();bets[k]=(bets[k]||0)-a;balance+=a;if(bets[k]<=0)delete bets[k];sync();
+};
+$("#clear").onclick=()=>{if(spinning||settling)return;balance+=total();bets={};undo=[];sync()};
+$("#rebet").onclick=()=>{
+  if(spinning||settling||!last)return;
+  balance+=total();bets={};undo=[];
+  const s=Object.values(last).reduce((a,b)=>a+b,0);
+  if(s>balance){msg("No te alcanza el saldo para repetir.");sync();return}
+  for(const k in last){bets[k]=last[k];balance-=last[k];undo.push([k,last[k]])}sync();
+};
+$("#dbl").onclick=()=>{
+  const t=total();if(spinning||settling||!t)return;
+  if(t>balance){msg("No te alcanza el saldo para doblar.");return}
+  for(const k in bets){undo.push([k,bets[k]]);bets[k]*=2}balance-=t;sync();
+};
+$("#reset").onclick=()=>{if(spinning||settling)return;balance=1000;bets={};undo=[];hist=[];allS=[];stats();round=0;wIdx=null;$("#hist").innerHTML="";$("#res").textContent="?";$("#res").style.background="#333";$("#lw").textContent="—";msg("Saldo reiniciado. Haz tus apuestas.");sync()};
+
+function msg(t){$("#msg").textContent=t}
+function sync(){
+  $("#bal").textContent=fmt(balance);$("#tot").textContent=fmt(total());$("#rnd").textContent=round;
+  document.querySelectorAll(".stack").forEach(s=>s.remove());
+  document.querySelectorAll(".cell").forEach(c=>{
+    const a=bets[c.dataset.key];if(!a)return;
+    const s=document.createElement("div");s.className="stack";
+    s.innerHTML=breakdown(a).map((v,i)=>chipEl(v).replace('style="',`style="top:${-i*4}px;`)).join("")+`<span class="tag">${fmt(a)}</span>`;
+    c.appendChild(s);
+  });
+  const lock=spinning||settling;
+  ["undo","clear","rebet","dbl","spin"].forEach(id=>$("#"+id).disabled=lock);
+  $("#reset").disabled=lock;
+  try{localStorage.setItem("ruleta_saldo",balance+total())}catch(e){}
+}
+
+/* ---------- Rueda en canvas (alta resolución) ---------- */
+const cv=$("#wheel"),ctx=cv.getContext("2d");
+let wheel=0,ball={a:0,r:200},wIdx=null,anim=null,lastT=0;
+new ResizeObserver(()=>{
+  const dpr=Math.max(2,window.devicePixelRatio||1);
+  cv.width=cv.height=Math.min(1800,Math.round(cv.clientWidth*dpr));
+}).observe(cv);
+function disc(r,f){ctx.beginPath();ctx.arc(250,250,r,0,7);ctx.fillStyle=f;ctx.fill()}
+function draw(){
+  const k=cv.width/500;ctx.setTransform(k,0,0,k,0,0);ctx.clearRect(0,0,500,500);
+  let g=ctx.createRadialGradient(250,250,200,250,250,248);
+  g.addColorStop(0,"#5a3416");g.addColorStop(.55,"#8f5a27");g.addColorStop(1,"#3a1f08");disc(248,g);
+  disc(224,"#e6c36a");
+  g=ctx.createRadialGradient(250,250,150,250,250,220);g.addColorStop(0,"#0b2a1c");g.addColorStop(1,"#1f5239");disc(220,g);
+  ctx.save();ctx.translate(250,250);ctx.rotate(wheel);
+  ctx.lineWidth=1.2;ctx.strokeStyle="#e6c36a";ctx.font="700 15px system-ui,sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";
+  ORDER.forEach((n,i)=>{
+    const a0=i*STEP-Math.PI/2,a1=a0+STEP;
+    ctx.beginPath();ctx.arc(0,0,185,a0,a1);ctx.arc(0,0,140,a1,a0,true);ctx.closePath();
+    ctx.fillStyle=HEX[colorOf(n)];ctx.fill();ctx.stroke();
+    ctx.save();ctx.rotate(a0+STEP/2);ctx.translate(163,0);ctx.rotate(Math.PI/2);ctx.fillStyle="#fff";ctx.fillText(n,0,0);ctx.restore();
+  });
+  ctx.beginPath();ctx.arc(0,0,140,0,7);ctx.lineWidth=4;ctx.strokeStyle="#e6c36a";ctx.stroke();
+  const cg=ctx.createRadialGradient(0,0,10,0,0,140);
+  cg.addColorStop(0,"#fbe9a8");cg.addColorStop(.55,"#c9a24a");cg.addColorStop(1,"#6d4f17");
+  ctx.beginPath();ctx.arc(0,0,138,0,7);ctx.fillStyle=cg;ctx.fill();
+  ctx.lineWidth=7;ctx.strokeStyle="#8a6420";ctx.lineCap="round";
+  for(let i=0;i<4;i++){ctx.rotate(Math.PI/2);ctx.beginPath();ctx.moveTo(0,16);ctx.lineTo(0,100);ctx.stroke()}
+  ctx.beginPath();ctx.arc(0,0,22,0,7);ctx.fillStyle="#f5dc8e";ctx.fill();ctx.lineWidth=3;ctx.strokeStyle="#8a6420";ctx.stroke();
+  ctx.restore();
+  if(ball.on){
+    const x=250+ball.r*Math.cos(ball.a),y=250+ball.r*Math.sin(ball.a);
+    ctx.save();ctx.shadowColor="rgba(0,0,0,.7)";ctx.shadowBlur=6;ctx.shadowOffsetY=2;
+    const bg=ctx.createRadialGradient(x-2,y-2,1,x,y,7.5);bg.addColorStop(0,"#fff");bg.addColorStop(1,"#b9b9b9");
+    ctx.beginPath();ctx.arc(x,y,7.5,0,7);ctx.fillStyle=bg;ctx.fill();ctx.restore();
+  }
+}
+const pocketAng=i=>(i+.5)*STEP-Math.PI/2;
+function frame(now){
+  const dt=Math.min(.05,(now-lastT)/1000||0);lastT=now;
+  if(anim){
+    const t=Math.min(1,(now-anim.t0)/anim.dur),p=1-Math.pow(1-t,3);
+    wheel=anim.w0+(anim.wF-anim.w0)*p;
+    ball.a=anim.bF+Math.PI*2*8*(1-p);
+    const s=Math.min(1,Math.max(0,(t-.72)/.28)),e=s*s*(3-2*s);
+    ball.r=200-38*e+Math.sin(t*90)*(1-t)*4*e;
+    if(t>=1){anim=null;finish()}
+  }else{
+    wheel+=dt*.12;
+    if(wIdx!==null){ball.a=wheel+pocketAng(wIdx);ball.r=162}
+  }
+  draw();requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---------- Tirada ---------- */
+let result=0;
+$("#spin").onclick=()=>{
+  if(spinning||settling)return;
+  if(!total()){msg("Coloca alguna ficha antes de girar.");return}
+  const buf=new Uint32Array(1);crypto.getRandomValues(buf);
+  result=buf[0]%37;wIdx=ORDER.indexOf(result);
+  const wF=wheel+Math.PI*2*3+Math.random()*2;
+  anim={t0:performance.now(),dur:FAST?3200:6500,w0:wheel,wF,bF:wF+pocketAng(wIdx)};
+  ball.on=true;spinning=true;msg("¡No va más!");$("#res").textContent="…";$("#res").style.background="#333";sync();
+};
+function finish(){
+  spinning=false;settling=true;round++;
+  const n=result,bt=total();let ret=0;
+  for(const k in bets){const m=mult(k,n);if(m){ret+=bets[k]*(m+1);document.querySelector(`.cell[data-key="${k}"]`).classList.add("win")}}
+  last={...bets};balance+=ret;
+  const net=ret-bt,c=colorOf(n);
+  $("#res").textContent=n;$("#res").style.background=HEX[c];
+  const names={red:"rojo",black:"negro",green:"verde"};
+  msg(`Sale el ${n} ${names[c]}. `+(net>0?`¡Ganas ${fmt(net)}!`:net===0?"Recuperas tu apuesta.":"La banca gana esta vez."));
+  const lw=$("#lw");lw.textContent=(net>0?"+":"")+fmt(net);lw.className=net>0?"pos":net<0?"neg":"";
+  hist.unshift(n);hist=hist.slice(0,14);
+  $("#hist").innerHTML=hist.map(h=>`<span class="${colorOf(h)}">${h}</span>`).join("");
+  allS.push(n);stats();if(net>0)chime();else beep(200,.25,"sawtooth",.05);
+  sync();
+  setTimeout(()=>{
+    bets={};undo=[];settling=false;
+    document.querySelectorAll(".win").forEach(x=>x.classList.remove("win"));
+    if(balance<=0){msg("Te has quedado sin fichas. Pulsa Reiniciar para volver a jugar.")}
+    sync();
+  },2800);
+}
+/* ---------- Menú, sonido, estadísticas y atajos ---------- */
+function stats(){
+  const c={red:0,black:0,green:0},f={};
+  allS.forEach(n=>{c[colorOf(n)]++;f[n]=(f[n]||0)+1});
+  const t=allS.length||1,top=Object.entries(f).sort((a,b)=>b[1]-a[1])[0];
+  const pill=k=>`<span><i class="dot ${k}"></i>${c[k]} <small>${Math.round(c[k]*100/t)}%</small></span>`;
+  $("#stats").innerHTML=pill("red")+pill("black")+pill("green")+`<span><small>Más repetido</small> ${top?top[0]+" (×"+top[1]+")":"—"}</span>`;
+}
+function beep(f=600,d=.08,type="triangle",v=.07){
+  if(!SOUND)return;
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=f;g.gain.value=v;
+    g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+d);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+d);
+  }catch(e){}
+}
+function chime(){[660,880,1100].forEach((f,i)=>setTimeout(()=>beep(f,.28,"sine",.09),i*120))}
+$("#snd").onclick=e=>{SOUND=!SOUND;e.currentTarget.setAttribute("aria-pressed",SOUND);e.currentTarget.textContent=SOUND?"Sonido: sí":"Sonido: no"};
+$("#fast").onclick=e=>{FAST=!FAST;e.currentTarget.setAttribute("aria-pressed",FAST);e.currentTarget.textContent=FAST?"Giro rápido: sí":"Giro rápido: no"};
+$("#rules").onclick=()=>$("#dlg").showModal();
+// atajos de teclado
+document.addEventListener("keydown",e=>{
+  if($("#dlg").open||e.ctrlKey||e.metaKey||e.altKey)return;
+  const k=e.key.toLowerCase(),map={" ":"spin",z:"undo",c:"clear",r:"rebet",d:"dbl"};
+  if(map[k]){e.preventDefault();document.activeElement&&document.activeElement.blur();$("#"+map[k]).click();return}
+  if(k>="1"&&k<="6")document.querySelectorAll("#tray .chip")[+k-1].click();
+});
+stats();
+sync();
+</script>
+</body>
+</html>
