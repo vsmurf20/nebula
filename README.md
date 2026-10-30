@@ -13,17 +13,13 @@ NEBULA es una web estática para presentar y jugar a juegos HTML en el navegador
 
 ## Añadir o actualizar un juego
 
-El catálogo se alimenta desde `games.js`. Cada juego tiene un `id`, `title`, `description`, `category`, `status`, `icon`, `cover`, `path`, `version`, `about`, `controls`, `updated` y `changes`.
+1. Crea la carpeta `games/<id>/` y copia dentro el HTML del juego con el nombre `index.html`.
+2. Crea una portada de 800×450 en `assets/covers/<id>.webp`.
+3. Añade un objeto a `games.js` con `id`, `title`, `description`, `category`, `status:"Disponible"`, `icon`, `cover`, `path`, `version`, `about`, `controls`, `updated` y `changes`.
+4. Cambia el parámetro `?v=` de `games.js` en `index.html`, `catalogo.html`, `detalle.html` y `play.html` (el mismo en los cuatro) para que los navegadores no usen una copia antigua.
+5. Sube los cambios a GitHub. Portada, ficha, filtros y botón de jugar se actualizan solos.
 
-Para publicar un juego nuevo:
-
-1. Copia el HTML del juego en `games/<id>/index.html` (por ejemplo `games/golfitos/index.html`). Respeta mayúsculas y minúsculas.
-2. Añade su portada en `assets/covers/<id>.webp` (recomendado 800×450).
-3. Añade un objeto nuevo en `games.js` con los campos anteriores, `status: "Disponible"` y `cover: "url('assets/covers/<id>.webp')"`.
-4. Sube los cambios a GitHub. La portada, la ficha y el botón de jugar se actualizan solos.
-5. Cambia el número de versión de `games.js?v=...` en los HTML si quieres forzar que los navegadores recarguen el catálogo.
-
-Si un juego aún no está listo, ponlo con `status: "Próximamente"`: aparecerá en el catálogo sin botón de jugar.
+`id` y `path` deben coincidir con el nombre de la carpeta (respeta mayúsculas y minúsculas).
 
 ## Publicar en GitHub Pages
 
@@ -80,3 +76,8 @@ Ambos juegos están registrados como disponibles en `games.js`.
 - Distrito Cero pasa al género **Acción**.
 - Se elimina el espacio vacío «Juego 09» y las carpetas de relleno sin usar (`juego-3`, `juego-4`, `juego-06` a `juego-11`).
 - Los cuatro juegos nuevos cargan Three.js desde `cdnjs.cloudflare.com`, así que necesitan conexión a Internet.
+
+- **Ruleta Europea** (`games/ruleta-europea/index.html`), con portada propia en `assets/covers/ruleta-europea.webp`. Categoría: Mesa. Es un juego de azar sin dinero real; el saldo se guarda en el navegador.
+- Todas las páginas cargan `games.js` con el mismo parámetro de versión (`?v=20261030-ruleta`): cámbialo en los cuatro HTML cada vez que edites `games.js` para evitar que el navegador use una copia antigua.
+
+- **Serpentrón** (`games/serpentron/index.html`), con portada propia en `assets/covers/serpentron.webp`. Categoría: Arcade. Modo 1 jugador contra bots y modo 2 jugadores en pantalla dividida.
