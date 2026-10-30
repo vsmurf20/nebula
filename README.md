@@ -15,16 +15,15 @@ NEBULA es una web estática para presentar y jugar a juegos HTML en el navegador
 
 El catálogo se alimenta desde `games.js`. Cada juego tiene un `id`, `title`, `description`, `category`, `status`, `icon`, `cover`, `path`, `version`, `about`, `controls`, `updated` y `changes`.
 
-Para publicar un juego nuevo en uno de los espacios 05–12:
+Para publicar un juego nuevo:
 
-1. Abre `games.js` y localiza el objeto del espacio, por ejemplo `juego-06` o cualquier espacio libre.
-2. Copia el archivo HTML del juego dentro de `games/juego-05/` y llámalo exactamente `index.html`.
-3. Cambia el título, descripción, género, icono, portada, versión, explicación, controles, fecha y novedades.
-4. Comprueba que `path` sea `games/juego-05/index.html`.
-5. Cambia `status: "Próximamente"` a `status: "Disponible"`.
-6. Guarda y sube los cambios a GitHub. La portada, la ficha y el botón de jugar se actualizan automáticamente.
+1. Copia el HTML del juego en `games/<id>/index.html` (por ejemplo `games/golfitos/index.html`). Respeta mayúsculas y minúsculas.
+2. Añade su portada en `assets/covers/<id>.webp` (recomendado 800×450).
+3. Añade un objeto nuevo en `games.js` con los campos anteriores, `status: "Disponible"` y `cover: "url('assets/covers/<id>.webp')"`.
+4. Sube los cambios a GitHub. La portada, la ficha y el botón de jugar se actualizan solos.
+5. Cambia el número de versión de `games.js?v=...` en los HTML si quieres forzar que los navegadores recarguen el catálogo.
 
-Puedes usar un identificador y carpeta distintos, pero deben coincidir con `id` y `path` en `games.js`. Respeta mayúsculas y minúsculas en los nombres.
+Si un juego aún no está listo, ponlo con `status: "Próximamente"`: aparecerá en el catálogo sin botón de jugar.
 
 ## Publicar en GitHub Pages
 
@@ -46,8 +45,8 @@ Puedes usar un identificador y carpeta distintos, pero deben coincidir con `id` 
 Desde esta carpeta ejecuta `python3 -m http.server 8000` y abre `http://localhost:8000`.
 
 
-## Portadas originales (v6)
-Las cuatro primeras fichas usan portadas propias en `assets/covers/`. Para cambiar una portada, sustituye el archivo WebP correspondiente conservando su nombre.
+## Portadas
+Todos los juegos con portada ilustrada usan archivos WebP en `assets/covers/`. Para cambiar una portada, sustituye el archivo conservando su nombre. Floppy Wings, Party Island, Sala de cartas y Trébol Roto aún usan portadas SVG sencillas.
 
 ## Recibir sugerencias por Internet (Formspree)
 GitHub Pages sirve archivos estáticos y no procesa formularios por sí solo. NEBULA está preparada para usar Formspree como receptor externo de formularios.
@@ -73,3 +72,11 @@ El plan gratuito de Formspree indica un límite de 50 envíos al mes y 30 días 
 - **Trébol Roto**: `games/trebol-roto/index.html` (juego arcade de rondas y tiradas).
 
 Ambos juegos están registrados como disponibles en `games.js`.
+
+## Juegos añadidos (30 oct 2026)
+
+- **Estadio 11**, **Canastazo**, **Golfitos** y **Bolitos** (juegos 3D de deportes), con portadas propias.
+- Fútbol, Básquet y Vóley pasan a llamarse **Pixel Fútbol**, **Pixel Básquet** y **Pixel Vóley** (los identificadores y carpetas no cambian para no romper enlaces).
+- Distrito Cero pasa al género **Acción**.
+- Se elimina el espacio vacío «Juego 09» y las carpetas de relleno sin usar (`juego-3`, `juego-4`, `juego-06` a `juego-11`).
+- Los cuatro juegos nuevos cargan Three.js desde `cdnjs.cloudflare.com`, así que necesitan conexión a Internet.

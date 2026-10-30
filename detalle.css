@@ -38,3 +38,8 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}body{background:var(--bg);co
 }
 .detail-cover span#detail-icon{position:relative;z-index:1}
 @media(max-width:560px){.detail-cover .detail-cover-label{font-size:9px!important;letter-spacing:.1em!important}}
+
+/* Portadas ilustradas NEBULA */
+.detail-cover.has-cover{background-repeat:no-repeat!important;background-position:center!important;background-size:cover!important}
+.detail-cover.has-cover:before,.detail-cover.has-cover:after{display:none!important}
+.detail-cover.has-cover #detail-icon{display:none!important}

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vóley</title>
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pixel Vóley</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#171a2e;--ink:#fff4e0;--a:#f2b84b}
@@ -97,7 +97,7 @@ let last=0,acc=0;function frame(t){acc+=Math.min(50,t-last);last=t;while(acc>=16
 if(mode==1){inp[0]={l:a.l||b.l,r:a.r||b.r,u:a.u||b.u,d:a.d||b.d,a:a.a||b.a};inp[1]=G.bot()}else inp=[a,b];
 if(cdn>0){if(--cdn==0){msg='¡YA!';msgT=40;beep(880,.2)}else if(cdn%60==0)beep(440,.1)}else if(hs>0)hs--;else if(wait>0){if(--wait==0&&pend>=0){G.reset(pend);pend=-1}}else{G.update();mt++}if(msgT>0)msgT--}}tt++;ctx.save();if(shake>.3){ctx.translate(Math.round((Math.random()-.5)*shake),Math.round((Math.random()-.5)*shake));shake*=.88}G.draw();drawPT();ctx.restore();ctx.drawImage(VIG,0,0);hud();requestAnimationFrame(frame)}
 
-const G={target:7,title:'VÓLEY',sub:'Primero a 7 · máximo 3 toques',ctl:['A D mover · W saltar y rematar','← → mover · ↑ saltar y rematar'],
+const G={target:7,title:'PIXEL VÓLEY',sub:'Primero a 7 · máximo 3 toques',ctl:['A D mover · W saltar y rematar','← → mover · ↑ saltar y rematar'],
 init(){this.P=[mk(110,1),mk(370,-1)];this.b={x:120,y:80,vx:0,vy:0,r:6,rot:0};this.t=[0,0];this.cd=[0,0];this.side=0;this.err=0;this.c=0},
 reset(s){const P=this.P;P[0].x=110;P[1].x=370;P.forEach(p=>{p.vx=p.vy=0;p.y=GY});Object.assign(this.b,{x:s?370:110,y:80,vx:0,vy:0});this.t=[0,0];this.side=s},
 update(){const P=this.P,b=this.b;

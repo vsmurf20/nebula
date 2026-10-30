@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Básquet</title>
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pixel Básquet</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#171a2e;--ink:#fff4e0;--a:#ff8a3d}
@@ -98,7 +98,7 @@ if(mode==1){inp[0]={l:a.l||b.l,r:a.r||b.r,u:a.u||b.u,d:a.d||b.d,a:a.a||b.a};inp[
 if(cdn>0){if(--cdn==0){msg='¡YA!';msgT=40;beep(880,.2)}else if(cdn%60==0)beep(440,.1)}else if(hs>0)hs--;else if(wait>0){if(--wait==0&&pend>=0){G.reset(pend);pend=-1}}else{G.update();mt++}if(msgT>0)msgT--}}tt++;ctx.save();if(shake>.3){ctx.translate(Math.round((Math.random()-.5)*shake),Math.round((Math.random()-.5)*shake));shake*=.88}G.draw();drawPT();ctx.restore();ctx.drawImage(VIG,0,0);hud();requestAnimationFrame(frame)}
 
 const RY=GY-100,HP=[{bx:W-26,fx:W-58,cx:W-44,s:-1},{bx:26,fx:58,cx:44,s:1}];
-const G={target:15,title:'BÁSQUET',sub:'Primero a 15 · canasta de 2 o 3',ctl:['A D mover · W saltar: tira o roba','← → mover · ↑ saltar: tira o roba'],
+const G={target:15,title:'PIXEL BÁSQUET',sub:'Primero a 15 · canasta de 2 o 3',ctl:['A D mover · W saltar: tira o roba','← → mover · ↑ saltar: tira o roba'],
 init(){this.P=[mk(110,1),mk(370,-1)];this.b={x:0,y:0,vx:0,vy:0,r:6,rot:0,h:0,sh:-1,cd:0,live:0,pts:2};this.t=0;this.pw=0},
 reset(s){const P=this.P,b=this.b;P[0].x=110;P[1].x=370;P.forEach(p=>{p.vx=p.vy=0;p.y=GY;p.stun=0});P[0].dir=1;P[1].dir=-1;Object.assign(b,{h:1-s,sh:-1,live:0,vx:0,vy:0})},
 shoot(i){const p=this.P[i],b=this.b,hx=HP[i].cx,x0=p.x,y0=p.y-46,dx=hx-x0,dy=RY-y0,tt=26+Math.abs(dx)*.13;let vx=dx/tt,vy=(dy-.1*tt*tt)/tt;
